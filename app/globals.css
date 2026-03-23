@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background: #f8f4f4;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.86), transparent 30%),
+    radial-gradient(circle at bottom center, rgba(255, 255, 255, 0.55), transparent 34%),
+    #f8f4f4;
+  color: #1e2742;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  border-color: #e7ebf3;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8b918d;
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl font-semibold leading-[30px];
+  }
+
+  h2 {
+    @apply text-lg font-semibold leading-6;
+  }
+
+  p {
+    @apply text-[15px] leading-[22px];
+  }
+}
+
+@layer components {
+  .app-frame {
+    @apply mx-auto min-h-screen w-full max-w-md bg-pawbit-background;
+  }
+
+  .surface-card {
+    @apply rounded-[26px] border border-pawbit-stroke/80 bg-pawbit-surface shadow-soft;
+  }
+
+  .screen-padding {
+    @apply px-6 pb-28 pt-6;
+  }
+
+  .pill-control {
+    @apply rounded-pill border border-pawbit-stroke bg-white px-4 py-3 text-sm font-medium text-pawbit-muted shadow-soft;
+  }
+
+  .section-kicker {
+    @apply text-xs font-semibold uppercase tracking-[0.12em] text-[#9caac2];
+  }
+}

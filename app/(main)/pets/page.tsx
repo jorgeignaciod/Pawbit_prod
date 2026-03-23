@@ -1,0 +1,90 @@
+"use client";
+
+export const dynamic = "force-dynamic";
+
+import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
+
+import { AppShell } from "@/components/layout/app-shell";
+import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
+import { PetCard } from "@/components/pets/pet-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { resolveDemoState } from "@/lib/demo-state";
+import { petsService } from "@/services/pets.service";
+import { Pet } from "@/types/pet";
+
+export default function PetsPage() {
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
+
+  useEffect(() => {
+    const viewState = resolveDemoState(new URLSearchParams(window.location.search).get("state"));
+
+    if (viewState === "loading") {
+      setStatus("loading");
+      return;
+    }
+
+    if (viewState === "error") {
+      setStatus("error");
+      return;
+    }
+
+    petsService.getPets().then((data) => {
+      setPets(viewState === "empty" ? [] : data);
+      setStatus("success");
+    });
+  }, []);
+
+  return (
+    <AppShell
+      title="Mascotas"
+      subtitle="Mascotas"
+      chrome="plain"
+      topBarAction={
+        <button type="button" className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral" aria-label="Agregar mascota">
+          <Plus className="h-7 w-7" />
+        </button>
+      }
+    >
+      <div className="space-y-5">
+        {status === "loading" ? <LoadingCard label={pets.length > 1 ? "Cargando tus mascotas..." : "Cargando tu mascota..."} /> : null}
+        {status === "error" ? (
+          <ErrorCard
+            title={pets.length > 1 ? "No pudimos listar tus mascotas" : "No pudimos cargar tu mascota"}
+            description={
+              pets.length > 1
+                ? "Reintenta para volver a cargar las fichas registradas."
+                : "Reintenta para volver a cargar la ficha registrada."
+            }
+            onRetry={() => window.location.reload()}
+          />
+        ) : null}
+
+        {status === "success" ? (
+          pets.length ? (
+            <>
+              <div className="space-y-4">
+                {pets.map((pet) => (
+                  <PetCard key={pet.id} pet={pet} />
+                ))}
+              </div>
+              <div className="surface-card border-dashed bg-transparent py-12 text-center text-pawbit-hint">
+                <p className="mb-2 text-3xl">🐾</p>
+                <p className="text-[16px]">{pets.length > 1 ? "¿Quieres agregar otra mascota?" : "¿Tienes otra mascota?"}</p>
+                <p className="mt-2 text-[16px] font-semibold text-pawbit-primary">Añadir perfil</p>
+              </div>
+            </>
+          ) : (
+            <EmptyState
+              title="Sin mascotas registradas"
+              description="Agrega tu primera mascota para empezar a construir su historial."
+              actionLabel="Crear ficha"
+              onAction={() => {}}
+            />
+          )
+        ) : null}
+      </div>
+    </AppShell>
+  );
+}
