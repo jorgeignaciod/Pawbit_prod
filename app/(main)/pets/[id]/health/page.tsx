@@ -55,6 +55,7 @@ export default function PetHealthPage() {
       title={pet?.name ?? "Salud"}
       subtitle="Detalle Mascota: Salud"
       chrome="plain"
+      hideTopBarTitle
       topBarAction={
         <button type="button" className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">
           <Ellipsis className="h-5 w-5" />

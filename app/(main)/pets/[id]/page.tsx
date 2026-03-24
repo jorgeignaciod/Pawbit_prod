@@ -23,6 +23,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
       title="Gus"
       subtitle="Detalle de Mascota"
       chrome="plain"
+      hideTopBarTitle
       topBarAction={
         <button type="button" className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">
           <Ellipsis className="h-5 w-5" />

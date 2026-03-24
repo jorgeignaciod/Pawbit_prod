@@ -55,7 +55,7 @@ export default function RegisterVaccinePage() {
   const activePet = petsMock.find((pet) => pet.id === form.watch("petId")) ?? petsMock[0];
 
   return (
-    <AppShell title="Registrar" subtitle="Registrar Vacuna" chrome="plain">
+    <AppShell title="Registrar" subtitle="Registrar Vacuna" chrome="plain" hideTopBarTitle>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Link href="/register" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">

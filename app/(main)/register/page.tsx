@@ -10,7 +10,7 @@ const activePet = petsMock[0];
 
 export default function RegisterPage() {
   return (
-    <AppShell title="Registrar" subtitle="Registrar" chrome="plain">
+    <AppShell title="Registrar" subtitle="Registrar" chrome="plain" hideTopBarTitle>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Link href="/home" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">

@@ -22,6 +22,7 @@ export default function ProfilePage() {
       title="Mi Perfil"
       subtitle="Mi Perfil"
       chrome="plain"
+      hideTopBarTitle
       topBarAction={
         <button type="button" className="flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft">
           <Settings className="h-5 w-5" />

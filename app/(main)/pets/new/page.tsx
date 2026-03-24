@@ -69,7 +69,7 @@ export default function NewPetPage() {
   }
 
   return (
-    <AppShell title="Añadir mascota" subtitle="Mascotas" chrome="plain">
+    <AppShell title="Añadir mascota" subtitle="Mascotas" chrome="plain" hideTopBarTitle>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Link href="/pets" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">

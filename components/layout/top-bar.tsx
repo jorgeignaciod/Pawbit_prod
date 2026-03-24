@@ -7,19 +7,23 @@ export function TopBar({
   subtitle,
   showLogo = false,
   action,
-  plain = false
+  plain = false,
+  hideTitle = false
 }: {
   title?: string;
   subtitle?: string;
   showLogo?: boolean;
   action?: React.ReactNode;
   plain?: boolean;
+  hideTitle?: boolean;
 }) {
   return (
     <header className={plain ? "pt-3" : "sticky top-0 z-20 bg-pawbit-background/96 backdrop-blur"}>
       <div className="mx-auto flex h-14 max-w-md items-center justify-between px-6">
         {showLogo ? (
           <Logo compact />
+        ) : hideTitle ? (
+          <div />
         ) : (
           <div>
             <p className="text-[18px] font-semibold text-pawbit-text">{title}</p>

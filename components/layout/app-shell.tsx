@@ -6,17 +6,25 @@ export function AppShell({
   title,
   subtitle,
   topBarAction,
-  chrome = "default"
+  chrome = "default",
+  hideTopBarTitle = false
 }: {
   children: React.ReactNode;
   title: string;
   subtitle?: string;
   topBarAction?: React.ReactNode;
   chrome?: "default" | "plain";
+  hideTopBarTitle?: boolean;
 }) {
   return (
     <div className="app-frame">
-      <TopBar title={title} subtitle={subtitle} action={topBarAction} plain={chrome === "plain"} />
+      <TopBar
+        title={title}
+        subtitle={subtitle}
+        action={topBarAction}
+        plain={chrome === "plain"}
+        hideTitle={hideTopBarTitle}
+      />
       <div className="screen-padding">{children}</div>
       <BottomNavigation />
     </div>
