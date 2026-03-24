@@ -1,12 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { AuthSocialButton } from "@/components/forms/auth-social-button";
 import { Input } from "@/components/ui/input";
-import { Logo } from "@/components/ui/logo";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { authService } from "@/services/auth.service";
 import { useAppStore } from "@/store/app-store";
@@ -24,10 +24,25 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col justify-between px-6 pb-8 pt-16">
-      <div className="space-y-10">
-        <Logo className="flex-col justify-center text-center" />
+      <div className="space-y-12">
+        <div className="flex flex-col items-center justify-center gap-2 text-center">
+          <div className="overflow-hidden rounded-[28px]">
+            <Image
+              src="/logo.png"
+              alt="PawBit"
+              width={160}
+              height={160}
+              priority
+              className="h-40 w-40 object-cover"
+            />
+          </div>
+          <h1 className="text-[40px] font-bold leading-none tracking-[-0.04em] text-[#1F2433]">
+            PawBit
+          </h1>
+          <p className="text-[17px] text-pawbit-muted">Registra - Recuerda - Cuida</p>
+        </div>
 
-        <section className="space-y-6">
+        <section className="space-y-6 pt-2">
           <AuthSocialButton provider="google" onClick={() => handleLogin("google")} />
 
           <div className="flex items-center gap-4 text-pawbit-muted">

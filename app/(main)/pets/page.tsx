@@ -2,6 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 
@@ -42,9 +43,9 @@ export default function PetsPage() {
       subtitle="Mascotas"
       chrome="plain"
       topBarAction={
-        <button type="button" className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral" aria-label="Agregar mascota">
+        <Link href="/pets/new" className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral" aria-label="Agregar mascota">
           <Plus className="h-7 w-7" />
-        </button>
+        </Link>
       }
     >
       <div className="space-y-5">
@@ -69,18 +70,20 @@ export default function PetsPage() {
                   <PetCard key={pet.id} pet={pet} />
                 ))}
               </div>
-              <div className="surface-card border-dashed bg-transparent py-12 text-center text-pawbit-hint">
+              <Link href="/pets/new" className="surface-card block border-dashed bg-transparent py-12 text-center text-pawbit-hint">
                 <p className="mb-2 text-3xl">🐾</p>
                 <p className="text-[16px]">{pets.length > 1 ? "¿Quieres agregar otra mascota?" : "¿Tienes otra mascota?"}</p>
-                <p className="mt-2 text-[16px] font-semibold text-pawbit-primary">Añadir perfil</p>
-              </div>
+                <p className="mt-2 text-[16px] font-semibold text-pawbit-primary">Añadir mascota</p>
+              </Link>
             </>
           ) : (
             <EmptyState
               title="Sin mascotas registradas"
               description="Agrega tu primera mascota para empezar a construir su historial."
-              actionLabel="Crear ficha"
-              onAction={() => {}}
+              actionLabel="Añadir mascota"
+              onAction={() => {
+                window.location.href = "/pets/new";
+              }}
             />
           )
         ) : null}
