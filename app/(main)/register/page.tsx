@@ -10,21 +10,24 @@ const activePet = petsMock[0];
 
 export default function RegisterPage() {
   return (
-    <AppShell title="Registrar" subtitle="Registrar" chrome="plain" hideTopBarTitle>
+    <AppShell
+      title="Registrar"
+      subtitle="Registrar"
+      chrome="plain"
+      centerTopBarTitle
+      topBarLeading={
+        <Link href="/home" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
+          <ArrowLeft className="h-5 w-5 text-pawbit-text" />
+        </Link>
+      }
+      topBarAction={<div className="h-12 w-12" />}
+    >
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Link href="/home" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
-            <ArrowLeft className="h-5 w-5 text-pawbit-text" />
-          </Link>
-          <div className="flex-1 text-center text-[20px] font-semibold text-pawbit-text">Registrar</div>
-          <div className="w-12" />
-        </div>
-
         <div className="flex gap-3 overflow-x-auto pb-1">
           <button className="rounded-pill bg-pawbit-primary px-6 py-3 text-[16px] font-semibold text-white shadow-coral">Peso</button>
           <Link href="/register/vaccine" className="rounded-pill bg-pawbit-error-bg px-6 py-3 text-[16px] font-medium text-pawbit-primary">Vacuna</Link>
-          <button className="rounded-pill bg-pawbit-error-bg px-6 py-3 text-[16px] font-medium text-pawbit-primary">Medicación</button>
-          <button className="rounded-pill bg-pawbit-error-bg px-6 py-3 text-[16px] font-medium text-pawbit-primary">Nota</button>
+          <Link href="/register/medication" className="rounded-pill bg-pawbit-error-bg px-6 py-3 text-[16px] font-medium text-pawbit-primary">Medicación</Link>
+          <Link href="/register/note" className="rounded-pill bg-pawbit-error-bg px-6 py-3 text-[16px] font-medium text-pawbit-primary">Nota</Link>
         </div>
 
         <div className="space-y-6">

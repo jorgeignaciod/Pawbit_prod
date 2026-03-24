@@ -49,17 +49,24 @@ export default function HomePage() {
 
   return (
     <AppShell
-      title="Hola, Jorge"
+      title="Inicio"
       subtitle="Inicio"
       chrome="plain"
+      centerTopBarTitle
+      topBarLeading={<div className="h-12 w-12" />}
       topBarAction={
-        <button type="button" className="relative text-pawbit-text" aria-label="Notificaciones">
+        <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
           <Bell className="h-6 w-6" />
           <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
         </button>
       }
     >
       <div className="space-y-6">
+        <section className="space-y-1">
+          <h1 className="text-[34px] font-bold tracking-[-0.05em] text-pawbit-text">Hola, Jorge</h1>
+          <p className="text-[16px] text-pawbit-muted">Aquí tienes el resumen de hoy.</p>
+        </section>
+
         {viewState === "success" ? (
           <div className="rounded-[22px] bg-pawbit-success-bg px-5 py-4 text-sm text-pawbit-text">
             {petsCount > 1

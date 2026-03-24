@@ -69,16 +69,19 @@ export default function NewPetPage() {
   }
 
   return (
-    <AppShell title="Añadir mascota" subtitle="Mascotas" chrome="plain" hideTopBarTitle>
+    <AppShell
+      title="Añadir mascota"
+      subtitle="Mascotas"
+      chrome="plain"
+      centerTopBarTitle
+      topBarLeading={
+        <Link href="/pets" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
+          <ArrowLeft className="h-5 w-5 text-pawbit-text" />
+        </Link>
+      }
+      topBarAction={<div className="h-12 w-12" />}
+    >
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Link href="/pets" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
-            <ArrowLeft className="h-5 w-5 text-pawbit-text" />
-          </Link>
-          <div className="flex-1 text-center text-[20px] font-semibold text-pawbit-text">Añadir mascota</div>
-          <div className="w-12" />
-        </div>
-
         {saving ? <LoadingCard label="Guardando nueva mascota..." /> : null}
         {saveError ? <ErrorCard title="No pudimos guardar la mascota" description="Revisa los datos e intenta nuevamente." /> : null}
         {submitted ? (

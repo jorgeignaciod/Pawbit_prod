@@ -42,7 +42,8 @@ export default function PetsPage() {
       title="Mascotas"
       subtitle="Mascotas"
       chrome="plain"
-      hideTopBarTitle
+      centerTopBarTitle
+      topBarLeading={<div className="h-12 w-12" />}
       topBarAction={
         <Link href="/pets/new" className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral" aria-label="Agregar mascota">
           <Plus className="h-7 w-7" />
