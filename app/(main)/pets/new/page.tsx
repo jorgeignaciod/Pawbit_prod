@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ImagePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,15 +14,61 @@ import { SelectField } from "@/components/forms/select-field";
 import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { CAT_BREEDS, DEFAULT_PET_BREED, DOG_BREEDS } from "@/constants/pet-breeds";
 
-const petSchema = z.object({
-  name: z.string().min(2, "Ingresa el nombre"),
-  species: z.enum(["Perro", "Gato"]),
-  breed: z.string().min(2, "Ingresa la raza"),
-  sex: z.enum(["Macho", "Hembra"]),
-  color: z.string().min(2, "Ingresa el color"),
-  weight: z.string().optional()
-});
+const petSchema = z
+  .object({
+    name: z.string().min(2, "Ingresa el nombre"),
+    species: z.enum(["", "Perro", "Gato"]),
+    breed: z.string(),
+    sex: z.enum(["Macho", "Hembra"]),
+    color: z.string().min(2, "Ingresa el color"),
+    isNeutered: z.enum(["", "yes", "no"]),
+    hasMicrochip: z.enum(["", "yes", "no"]),
+    microchipNumber: z.string().optional(),
+    weight: z.string().optional()
+  })
+  .superRefine((values, ctx) => {
+    if (!values.species) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Selecciona la especie",
+        path: ["species"]
+      });
+    }
+
+    if (!values.breed.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Selecciona la raza",
+        path: ["breed"]
+      });
+    }
+
+    if (!values.isNeutered) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Selecciona una opción",
+        path: ["isNeutered"]
+      });
+    }
+
+    if (!values.hasMicrochip) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Selecciona una opción",
+        path: ["hasMicrochip"]
+      });
+    }
+
+    if (values.hasMicrochip === "yes" && !values.microchipNumber?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Ingresa el número del microchip",
+        path: ["microchipNumber"]
+      });
+    }
+  });
 
 type PetFormValues = z.infer<typeof petSchema>;
 
@@ -36,15 +82,32 @@ export default function NewPetPage() {
     resolver: zodResolver(petSchema),
     defaultValues: {
       name: "",
-      species: "Perro",
+      species: "",
       breed: "",
       sex: "Macho",
       color: "",
+      isNeutered: "",
+      hasMicrochip: "",
+      microchipNumber: "",
       weight: ""
     }
   });
 
   const photoPreview = useMemo(() => photoUrl, [photoUrl]);
+  const selectedSpecies = form.watch("species");
+  const hasMicrochip = form.watch("hasMicrochip");
+  const breedOptions = selectedSpecies === "Perro" ? DOG_BREEDS : selectedSpecies === "Gato" ? CAT_BREEDS : [];
+
+  useEffect(() => {
+    if (!selectedSpecies) {
+      form.setValue("breed", "", { shouldDirty: true, shouldValidate: true });
+      return;
+    }
+
+    if (!(breedOptions as readonly string[]).includes(form.getValues("breed"))) {
+      form.setValue("breed", DEFAULT_PET_BREED, { shouldDirty: true, shouldValidate: true });
+    }
+  }, [breedOptions, form, selectedSpecies]);
 
   async function onSubmit() {
     setSaveError(false);
@@ -110,33 +173,92 @@ export default function NewPetPage() {
             </label>
           </FormField>
 
-          <FormField label="Nombre" error={form.formState.errors.name?.message}>
+          <FormField label="Nombre" required error={form.formState.errors.name?.message}>
             <Input placeholder="Ej: Luna" {...form.register("name")} />
           </FormField>
 
-          <FormField label="Especie" error={form.formState.errors.species?.message}>
+          <FormField label="Especie" required error={form.formState.errors.species?.message}>
             <SelectField {...form.register("species")}>
+              <option value="">Selecciona una especie</option>
               <option value="Perro">Perro</option>
               <option value="Gato">Gato</option>
             </SelectField>
           </FormField>
 
-          <FormField label="Raza" error={form.formState.errors.breed?.message}>
-            <Input placeholder="Ej: Dachshund" {...form.register("breed")} />
+          <FormField label="Raza" required error={form.formState.errors.breed?.message}>
+            <SelectField {...form.register("breed")} disabled={!selectedSpecies}>
+              <option value="">{selectedSpecies ? "Selecciona una raza" : "Primero selecciona una especie"}</option>
+              {breedOptions.map((breed) => (
+                <option key={breed} value={breed}>
+                  {breed}
+                </option>
+              ))}
+            </SelectField>
           </FormField>
 
-          <FormField label="Sexo" error={form.formState.errors.sex?.message}>
+          <FormField label="Sexo" required error={form.formState.errors.sex?.message}>
             <SelectField {...form.register("sex")}>
               <option value="Macho">Macho</option>
               <option value="Hembra">Hembra</option>
             </SelectField>
           </FormField>
 
-          <FormField label="Color" error={form.formState.errors.color?.message}>
+          <FormField label="Color" required error={form.formState.errors.color?.message}>
             <Input placeholder="Ej: Canela" {...form.register("color")} />
           </FormField>
 
-          <FormField label="Peso" helper="Opcional" error={form.formState.errors.weight?.message}>
+          <FormField label="Esterilizado / Castrado" required error={form.formState.errors.isNeutered?.message}>
+            <div className="grid grid-cols-2 gap-3">
+              <ChoiceButton
+                label="Sí"
+                active={form.watch("isNeutered") === "yes"}
+                onClick={() => form.setValue("isNeutered", "yes", { shouldDirty: true, shouldValidate: true })}
+              />
+              <ChoiceButton
+                label="No"
+                active={form.watch("isNeutered") === "no"}
+                onClick={() => form.setValue("isNeutered", "no", { shouldDirty: true, shouldValidate: true })}
+              />
+            </div>
+          </FormField>
+
+          <FormField label="Microchip" required error={form.formState.errors.hasMicrochip?.message}>
+            <div className="grid grid-cols-2 gap-3">
+              <ChoiceButton
+                label="Sí"
+                active={hasMicrochip === "yes"}
+                onClick={() => form.setValue("hasMicrochip", "yes", { shouldDirty: true, shouldValidate: true })}
+              />
+              <ChoiceButton
+                label="No"
+                active={hasMicrochip === "no"}
+                onClick={() => form.setValue("hasMicrochip", "no", { shouldDirty: true, shouldValidate: true })}
+              />
+            </div>
+          </FormField>
+
+          {hasMicrochip === "yes" ? (
+            <FormField label="Número de microchip" required error={form.formState.errors.microchipNumber?.message}>
+              <Input placeholder="Ej: 985141000124578" {...form.register("microchipNumber")} />
+            </FormField>
+          ) : (
+            <div className="rounded-[22px] border border-pawbit-stroke bg-pawbit-input-alt px-5 py-4">
+              <p className="text-[15px] text-pawbit-text">
+                Si aún no registras el microchip, puedes revisar el proceso oficial en{" "}
+                <a
+                  href="https://registratumascota.cl"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-pawbit-primary underline underline-offset-2"
+                >
+                  registratumascota.cl
+                </a>
+                .
+              </p>
+            </div>
+          )}
+
+          <FormField label="Peso" error={form.formState.errors.weight?.message}>
             <Input placeholder="Ej: 8.2 kg" {...form.register("weight")} />
           </FormField>
 
@@ -146,5 +268,30 @@ export default function NewPetPage() {
         </form>
       </div>
     </AppShell>
+  );
+}
+
+function ChoiceButton({
+  active,
+  disabled = false,
+  label,
+  onClick
+}: {
+  active: boolean;
+  disabled?: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`rounded-pill px-5 py-3 text-[16px] font-medium transition ${
+        active ? "bg-pawbit-primary text-white shadow-coral" : "bg-pawbit-input-alt text-pawbit-text"
+      } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+    >
+      {label}
+    </button>
   );
 }

@@ -12,6 +12,7 @@ export interface Pet {
   color: string;
   avatar: string;
   neutered: boolean;
+  microchipNumber?: string;
   notes: string;
   tutorName: string;
 }

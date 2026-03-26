@@ -42,8 +42,14 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-[54px] font-bold leading-none tracking-[-0.05em] text-pawbit-text">{pet.name}</h1>
-              <div className="mt-3 inline-flex rounded-pill bg-pawbit-chip-active px-3 py-1 text-sm font-semibold text-pawbit-primary">
-                {pet.species.toUpperCase()}
+              <div className="mt-3 space-y-2">
+                <div className="inline-flex rounded-pill bg-pawbit-chip-active px-3 py-1 text-sm font-semibold text-pawbit-primary">
+                  {pet.species.toUpperCase()}
+                </div>
+                <p className="text-[15px] text-pawbit-muted">
+                  {pet.species}
+                  {pet.microchipNumber ? ` · Microchip: ${pet.microchipNumber}` : ""}
+                </p>
               </div>
             </div>
             <button type="button" className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral">
@@ -57,10 +63,11 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
             <span className="px-6 pb-4 text-[15px] text-pawbit-muted">Documentos</span>
           </div>
 
-          <div className="mt-8 grid grid-cols-3 gap-3">
+          <div className="mt-8 grid grid-cols-2 gap-3">
             <StatBox label="Edad" value={formatAgeLabel(pet.birthDate)} />
             <StatBox label="Sexo" value={pet.sex} />
             <StatBox label="Peso" value={`${pet.weight} kg`} />
+            <StatBox label="Estado" value={getNeuteredLabel(pet.sex, pet.neutered)} />
           </div>
 
           <div className="mt-8">
@@ -93,4 +100,12 @@ function StatBox({ label, value }: { label: string; value: string }) {
       <p className="mt-2 text-[18px] font-semibold text-pawbit-text">{value}</p>
     </div>
   );
+}
+
+function getNeuteredLabel(sex: "Macho" | "Hembra", neutered: boolean) {
+  if (neutered) {
+    return sex === "Hembra" ? "Esterilizada" : "Castrado";
+  }
+
+  return sex === "Hembra" ? "No esterilizada" : "No castrado";
 }

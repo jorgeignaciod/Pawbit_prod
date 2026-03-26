@@ -13,6 +13,7 @@ export const petsMock: Pet[] = [
     avatar:
       "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=400&q=80",
     neutered: true,
+    microchipNumber: "985141000124578",
     notes: "Le cuesta tolerar viajes largos y necesita premio después del control.",
     tutorName: "Jorge Cifuentes"
   },
@@ -28,6 +29,7 @@ export const petsMock: Pet[] = [
     avatar:
       "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?auto=format&fit=crop&w=400&q=80",
     neutered: true,
+    microchipNumber: "990000123456781",
     notes: "Alergia estacional leve. Prefiere visitas por la mañana.",
     tutorName: "Jorge Cifuentes"
   }
