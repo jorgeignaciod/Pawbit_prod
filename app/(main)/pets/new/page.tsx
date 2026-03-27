@@ -10,11 +10,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { FormField } from "@/components/forms/form-field";
+import { SearchableCombobox } from "@/components/forms/searchable-combobox";
 import { SelectField } from "@/components/forms/select-field";
 import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton } from "@/components/ui/primary-button";
-import { CAT_BREEDS, DEFAULT_PET_BREED, DOG_BREEDS } from "@/constants/pet-breeds";
 
 const petSchema = z
   .object({
@@ -77,6 +77,8 @@ export default function NewPetPage() {
   const [submitted, setSubmitted] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [breedOptions, setBreedOptions] = useState<string[]>([]);
+  const [breedsLoading, setBreedsLoading] = useState(false);
 
   const form = useForm<PetFormValues>({
     resolver: zodResolver(petSchema),
@@ -96,18 +98,41 @@ export default function NewPetPage() {
   const photoPreview = useMemo(() => photoUrl, [photoUrl]);
   const selectedSpecies = form.watch("species");
   const hasMicrochip = form.watch("hasMicrochip");
-  const breedOptions = selectedSpecies === "Perro" ? DOG_BREEDS : selectedSpecies === "Gato" ? CAT_BREEDS : [];
 
   useEffect(() => {
     if (!selectedSpecies) {
+      setBreedOptions([]);
       form.setValue("breed", "", { shouldDirty: true, shouldValidate: true });
       return;
     }
 
-    if (!(breedOptions as readonly string[]).includes(form.getValues("breed"))) {
-      form.setValue("breed", DEFAULT_PET_BREED, { shouldDirty: true, shouldValidate: true });
+    let active = true;
+
+    async function loadBreeds() {
+      setBreedsLoading(true);
+
+      const breedsModule = await import("@/constants/pet-breeds");
+      const nextOptions =
+        selectedSpecies === "Perro"
+          ? ([...breedsModule.DOG_BREEDS] as string[])
+          : ([...breedsModule.CAT_BREEDS] as string[]);
+
+      if (!active) return;
+
+      setBreedOptions(nextOptions);
+      setBreedsLoading(false);
+
+      if (!nextOptions.includes(form.getValues("breed"))) {
+        form.setValue("breed", "", { shouldDirty: true, shouldValidate: true });
+      }
     }
-  }, [breedOptions, form, selectedSpecies]);
+
+    void loadBreeds();
+
+    return () => {
+      active = false;
+    };
+  }, [form, selectedSpecies]);
 
   async function onSubmit() {
     setSaveError(false);
@@ -186,14 +211,16 @@ export default function NewPetPage() {
           </FormField>
 
           <FormField label="Raza" required error={form.formState.errors.breed?.message}>
-            <SelectField {...form.register("breed")} disabled={!selectedSpecies}>
-              <option value="">{selectedSpecies ? "Selecciona una raza" : "Primero selecciona una especie"}</option>
-              {breedOptions.map((breed) => (
-                <option key={breed} value={breed}>
-                  {breed}
-                </option>
-              ))}
-            </SelectField>
+            <SearchableCombobox
+              value={form.watch("breed")}
+              options={breedOptions}
+              disabled={!selectedSpecies}
+              loading={breedsLoading}
+              placeholder={selectedSpecies ? "Selecciona una raza" : "Primero selecciona una especie"}
+              searchPlaceholder="Buscar raza"
+              emptyLabel="No encontramos esa raza. Prueba con otro nombre."
+              onChange={(breed) => form.setValue("breed", breed, { shouldDirty: true, shouldValidate: true })}
+            />
           </FormField>
 
           <FormField label="Sexo" required error={form.formState.errors.sex?.message}>
