@@ -1,16 +1,54 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { addMonths, format, isSameDay, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 import { AppShell } from "@/components/layout/app-shell";
-import { calendarEventsMock } from "@/mocks/calendar-events.mock";
+import { calendarService } from "@/services/calendar.service";
+import { CalendarEvent } from "@/types/calendar-event";
+import { ErrorCard, LoadingCard } from "@/components/feedback/state-card";
+import { resolveDemoState } from "@/lib/demo-state";
+import {
+  formatMonthLabel,
+  formatUpcomingLabel,
+  getEventsForMonth,
+  getMonthDays,
+  getUpcomingEvents
+} from "@/lib/calendar";
 
 const days = ["LU", "MA", "MI", "JU", "VI", "SA", "DO"];
-const calendarNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
 export default function CalendarPage() {
-  const upcomingCount = calendarEventsMock.length;
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
+  const [currentMonth, setCurrentMonth] = useState(() => new Date());
+
+  useEffect(() => {
+    const state = resolveDemoState(new URLSearchParams(window.location.search).get("state"));
+
+    if (state === "loading") {
+      setStatus("loading");
+      return;
+    }
+
+    if (state === "error") {
+      setStatus("error");
+      return;
+    }
+
+    calendarService.getEvents().then((data) => {
+      setEvents(state === "empty" ? [] : data);
+      setStatus("success");
+    });
+  }, []);
+
+  const monthEvents = useMemo(() => getEventsForMonth(events, currentMonth), [events, currentMonth]);
+  const upcomingEvents = useMemo(() => getUpcomingEvents(events).slice(0, 4), [events]);
+  const monthDays = useMemo(() => getMonthDays(currentMonth), [currentMonth]);
+  const today = new Date();
 
   return (
     <AppShell
@@ -35,52 +73,83 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <button className="rounded-pill border border-pawbit-error-border bg-pawbit-error-bg px-5 py-3 text-[16px] font-medium text-pawbit-primary">Todas ⌄</button>
-          <button className="rounded-pill bg-pawbit-chip-default px-5 py-3 text-[16px] font-medium text-pawbit-muted">Vacunas</button>
-        </div>
+        {status === "loading" ? <LoadingCard label="Cargando calendario mensual..." /> : null}
+        {status === "error" ? <ErrorCard title="No pudimos cargar el calendario" description="Intenta nuevamente para recuperar los eventos del mes." onRetry={() => window.location.reload()} /> : null}
 
-        <section className="space-y-5">
-          <div className="flex items-center justify-between">
-            <ChevronLeft className="h-6 w-6 text-pawbit-hint" />
-            <h2 className="text-[22px] font-semibold text-pawbit-text">Octubre 2023</h2>
-            <ChevronRight className="h-6 w-6 text-pawbit-hint" />
-          </div>
+        {status === "success" ? (
+          <>
+            <section className="space-y-5">
+              <div className="flex items-center justify-between">
+                <button type="button" onClick={() => setCurrentMonth((current) => addMonths(current, -1))}>
+                  <ChevronLeft className="h-6 w-6 text-pawbit-hint" />
+                </button>
+                <h2 className="text-[22px] font-semibold capitalize text-pawbit-text">{formatMonthLabel(currentMonth)}</h2>
+                <button type="button" onClick={() => setCurrentMonth((current) => addMonths(current, 1))}>
+                  <ChevronRight className="h-6 w-6 text-pawbit-hint" />
+                </button>
+              </div>
 
-          <div className="surface-card p-5">
-            <div className="grid grid-cols-7 gap-y-5 text-center">
-              {days.map((day) => (
-                <p key={day} className="text-[14px] font-semibold text-[#9aa8c0]">{day}</p>
-              ))}
-              {calendarNumbers.map((day) => (
-                <div key={day} className="flex flex-col items-center gap-2">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[18px] font-semibold ${day === 5 ? "bg-pawbit-primary text-white shadow-coral" : "text-pawbit-text"}`}>
-                    {day}
-                  </div>
-                  {[1, 7, 11].includes(day) ? <span className="h-1.5 w-1.5 rounded-full bg-pawbit-primary" /> : <span className="h-1.5 w-1.5 opacity-0" />}
+              <div className="surface-card p-5">
+                <div className="grid grid-cols-7 gap-y-5 text-center">
+                  {days.map((day) => (
+                    <p key={day} className="text-[14px] font-semibold text-[#9aa8c0]">
+                      {day}
+                    </p>
+                  ))}
+                  {monthDays.map(({ date, inCurrentMonth }) => {
+                    const hasEvent = monthEvents.some((event) => isSameDay(parseISO(event.startDate), date));
+                    const isToday = isSameDay(today, date);
+
+                    return (
+                      <div key={date.toISOString()} className="flex flex-col items-center gap-2">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-full text-[18px] font-semibold ${
+                            isToday
+                              ? "bg-pawbit-primary text-white shadow-coral"
+                              : inCurrentMonth
+                                ? "text-pawbit-text"
+                                : "text-pawbit-disabled"
+                          }`}
+                        >
+                          {format(date, "d", { locale: es })}
+                        </div>
+                        {hasEvent ? <span className="h-1.5 w-1.5 rounded-full bg-pawbit-primary" /> : <span className="h-1.5 w-1.5 opacity-0" />}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+              </div>
+            </section>
 
-        <section className="space-y-4">
-          <p className="section-kicker">
-            {upcomingCount === 0 ? "Sin eventos próximos" : upcomingCount === 1 ? "Próximo evento" : "Eventos próximos"}
-          </p>
-          {calendarEventsMock.slice(0, 2).map((event, index) => (
-            <div key={event.id} className="surface-card flex items-center gap-4 p-5">
-              <div className={`flex h-14 w-14 items-center justify-center rounded-full ${index === 0 ? "bg-pawbit-error-bg text-pawbit-primary" : "bg-pawbit-blue-bg text-pawbit-blue"}`}>
-                {index === 0 ? "✚" : "💉"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[18px] font-semibold text-pawbit-text">{event.title.replace(/^.* de /, "")}</p>
-                <p className="text-[15px] text-pawbit-muted">{index === 0 ? "Mañana, 09:00 AM" : "En 5 días, 11:30 AM"}</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-pawbit-hint" />
-            </div>
-          ))}
-        </section>
+            <section className="space-y-4">
+              <p className="section-kicker">
+                {upcomingEvents.length === 0 ? "Sin eventos próximos" : upcomingEvents.length === 1 ? "Próximo evento" : "Eventos próximos"}
+              </p>
+              {upcomingEvents.length ? (
+                upcomingEvents.map((event) => (
+                  <div key={event.id} className="surface-card flex items-center gap-4 p-5">
+                    <div
+                      className={`flex h-14 w-14 items-center justify-center rounded-full ${
+                        event.type === "Vacuna" ? "bg-pawbit-blue-bg text-pawbit-blue" : "bg-pawbit-error-bg text-pawbit-primary"
+                      }`}
+                    >
+                      {event.type === "Vacuna" ? "💉" : "✚"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[18px] font-semibold text-pawbit-text">{event.title}</p>
+                      <p className="text-[15px] text-pawbit-muted">{format(parseISO(event.startDate), "EEEE d MMM, HH:mm", { locale: es })}</p>
+                    </div>
+                    <span className="rounded-pill bg-pawbit-error-bg px-3 py-2 text-sm font-semibold text-pawbit-primary">
+                      {formatUpcomingLabel(event.startDate, today)}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-[22px] bg-white px-5 py-4 text-sm text-pawbit-muted shadow-soft">No hay eventos futuros para mostrar.</p>
+              )}
+            </section>
+          </>
+        ) : null}
       </div>
     </AppShell>
   );
