@@ -21,6 +21,7 @@ export default function CalendarWeekPage() {
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
   const [viewState, setViewState] = useState<DemoState>("default");
   const [currentWeek, setCurrentWeek] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     const nextViewState = resolveDemoState(new URLSearchParams(window.location.search).get("state"));
@@ -44,6 +45,10 @@ export default function CalendarWeekPage() {
 
   const visibleWeekEvents = useMemo(() => getEventsForWeek(events, currentWeek), [events, currentWeek]);
   const upcomingEvents = useMemo(() => getUpcomingEvents(events).slice(0, 4), [events]);
+
+  useEffect(() => {
+    setSelectedDate(null);
+  }, [currentWeek]);
 
   return (
     <AppShell
@@ -80,6 +85,8 @@ export default function CalendarWeekPage() {
               currentWeek={currentWeek}
               visibleEvents={visibleWeekEvents}
               upcomingEvents={upcomingEvents}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
               onPreviousWeek={() => setCurrentWeek((current) => addWeeks(current, -1))}
               onNextWeek={() => setCurrentWeek((current) => addWeeks(current, 1))}
             />
