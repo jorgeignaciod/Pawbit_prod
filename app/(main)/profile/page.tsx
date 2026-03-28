@@ -27,7 +27,7 @@ export default function ProfilePage() {
       topBarAction={<div className="h-12 w-12" />}
     >
       <div className="space-y-8">
-        <section className="space-y-4 pt-6 text-center">
+        <section className="space-y-4 pt-2 text-center">
           <div className="relative mx-auto h-28 w-28">
             {user?.avatar ? (
               <Image src={user.avatar} alt={user.name} width={112} height={112} className="h-28 w-28 rounded-full border-[6px] border-white object-cover shadow-soft" />

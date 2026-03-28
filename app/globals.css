@@ -54,7 +54,7 @@ textarea::placeholder {
   }
 
   .screen-padding {
-    @apply px-6 pb-28 pt-6;
+    @apply px-6 pb-28 pt-4;
   }
 
   .pill-control {

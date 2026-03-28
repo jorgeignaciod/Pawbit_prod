@@ -53,17 +53,15 @@ export default function HomePage() {
       subtitle="Inicio"
       chrome="plain"
       hideTopBarTitle
-      topBarAction={<div className="h-12 w-12" />}
+      topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">Hola, Jorge</h1>}
+      topBarAction={
+        <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
+          <Bell className="h-6 w-6" />
+          <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
+        </button>
+      }
     >
       <div className="space-y-6">
-        <section className="flex min-h-[48px] items-center justify-between gap-4">
-          <h1 className="text-[34px] font-bold tracking-[-0.05em] text-pawbit-text">Hola, Jorge</h1>
-          <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
-            <Bell className="h-6 w-6" />
-            <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
-          </button>
-        </section>
-
         {viewState === "success" ? (
           <div className="rounded-[22px] bg-pawbit-success-bg px-5 py-4 text-sm text-pawbit-text">
             {petsCount > 1

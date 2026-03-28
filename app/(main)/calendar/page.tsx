@@ -84,7 +84,7 @@ export default function CalendarPage() {
         </button>
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div className="rounded-pill bg-[#e9edf5] p-1 shadow-soft">
           <div className="grid grid-cols-2 gap-1">
             <button className="rounded-pill bg-white px-4 py-3 text-[17px] font-semibold text-pawbit-primary shadow-soft">Mes</button>
@@ -99,7 +99,7 @@ export default function CalendarPage() {
 
         {status === "success" ? (
           <>
-            <section className="space-y-5">
+            <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <button type="button" onClick={() => setCurrentMonth((current) => addMonths(current, -1))}>
                   <ChevronLeft className="h-6 w-6 text-pawbit-hint" />

@@ -64,7 +64,7 @@ export default function CalendarWeekPage() {
         </button>
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div className="rounded-pill bg-[#fdeff0] p-1 shadow-soft">
           <div className="grid grid-cols-2 gap-1">
             <Link href="/calendar" className="rounded-pill px-4 py-3 text-center text-[17px] font-medium text-pawbit-muted">
