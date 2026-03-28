@@ -52,19 +52,16 @@ export default function HomePage() {
       title="Inicio"
       subtitle="Inicio"
       chrome="plain"
-      centerTopBarTitle
-      topBarLeading={<div className="h-12 w-12" />}
-      topBarAction={
-        <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
-          <Bell className="h-6 w-6" />
-          <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
-        </button>
-      }
+      hideTopBarTitle
+      topBarAction={<div className="h-12 w-12" />}
     >
       <div className="space-y-6">
-        <section className="space-y-1">
+        <section className="flex min-h-[48px] items-center justify-between gap-4">
           <h1 className="text-[34px] font-bold tracking-[-0.05em] text-pawbit-text">Hola, Jorge</h1>
-          <p className="text-[16px] text-pawbit-muted">Aquí tienes el resumen de hoy.</p>
+          <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
+            <Bell className="h-6 w-6" />
+            <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
+          </button>
         </section>
 
         {viewState === "success" ? (

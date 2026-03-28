@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Bell } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
@@ -39,15 +39,16 @@ export default function PetsPage() {
 
   return (
     <AppShell
-      title="Mascotas"
+      title="Tus Mascotas"
       subtitle="Mascotas"
       chrome="plain"
-      centerTopBarTitle
-      topBarLeading={<div className="h-12 w-12" />}
+      hideTopBarTitle
+      topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">Tus Mascotas</h1>}
       topBarAction={
-        <Link href="/pets/new" className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral" aria-label="Agregar mascota">
-          <Plus className="h-7 w-7" />
-        </Link>
+        <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
+          <Bell className="h-6 w-6" />
+          <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
+        </button>
       }
     >
       <div className="space-y-5">

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BellRing, ChevronRight, CircleHelp, Lock, Mail, Pencil, Settings, UserRound } from "lucide-react";
+import { BellRing, ChevronRight, CircleHelp, Lock, Mail, Pencil, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -19,16 +19,12 @@ export default function ProfilePage() {
 
   return (
     <AppShell
-      title="Mi Perfil"
+      title="Mi perfil"
       subtitle="Mi Perfil"
       chrome="plain"
-      centerTopBarTitle
-      topBarLeading={<div className="h-12 w-12" />}
-      topBarAction={
-        <button type="button" className="flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft">
-          <Settings className="h-5 w-5" />
-        </button>
-      }
+      hideTopBarTitle
+      topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">Mi perfil</h1>}
+      topBarAction={<div className="h-12 w-12" />}
     >
       <div className="space-y-8">
         <section className="space-y-4 pt-6 text-center">
