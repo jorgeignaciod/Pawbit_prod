@@ -4,12 +4,12 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
 import { PetCard } from "@/components/pets/pet-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NotificationButton } from "@/components/ui/notification-button";
 import { resolveDemoState } from "@/lib/demo-state";
 import { petsService } from "@/services/pets.service";
 import { Pet } from "@/types/pet";
@@ -44,12 +44,7 @@ export default function PetsPage() {
       chrome="plain"
       hideTopBarTitle
       topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">Tus Mascotas</h1>}
-      topBarAction={
-        <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
-          <Bell className="h-6 w-6" />
-          <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
-        </button>
-      }
+      topBarAction={<NotificationButton />}
     >
       <div className="space-y-5">
         {status === "loading" ? <LoadingCard label={pets.length > 1 ? "Cargando tus mascotas..." : "Cargando tu mascota..."} /> : null}

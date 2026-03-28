@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { addMonths, format, isSameDay, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -11,6 +11,7 @@ import { calendarService } from "@/services/calendar.service";
 import { CalendarEvent } from "@/types/calendar-event";
 import { ErrorCard, LoadingCard } from "@/components/feedback/state-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NotificationButton } from "@/components/ui/notification-button";
 import { resolveDemoState } from "@/lib/demo-state";
 import {
   getEventsForDay,
@@ -77,12 +78,7 @@ export default function CalendarPage() {
       chrome="plain"
       hideTopBarTitle
       topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">Calendario</h1>}
-      topBarAction={
-        <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
-          <Bell className="h-6 w-6" />
-          <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
-        </button>
-      }
+      topBarAction={<NotificationButton />}
     >
       <div className="space-y-5">
         <div className="rounded-pill bg-[#e9edf5] p-1 shadow-soft">

@@ -5,12 +5,12 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { addWeeks } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { Bell } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { WeekCalendar } from "@/components/calendar/week-calendar";
+import { NotificationButton } from "@/components/ui/notification-button";
 import { calendarService } from "@/services/calendar.service";
 import { DemoState, resolveDemoState } from "@/lib/demo-state";
 import { CalendarEvent } from "@/types/calendar-event";
@@ -57,12 +57,7 @@ export default function CalendarWeekPage() {
       chrome="plain"
       hideTopBarTitle
       topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">Calendario</h1>}
-      topBarAction={
-        <button type="button" className="relative flex h-12 w-12 items-center justify-center rounded-full bg-pawbit-error-bg text-pawbit-primary shadow-soft" aria-label="Notificaciones">
-          <Bell className="h-6 w-6" />
-          <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-pawbit-primary" />
-        </button>
-      }
+      topBarAction={<NotificationButton />}
     >
       <div className="space-y-5">
         <div className="rounded-pill bg-[#fdeff0] p-1 shadow-soft">
