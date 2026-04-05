@@ -4,7 +4,9 @@ export const userMock: User = {
   id: "user-1",
   name: "Jorge Cifuentes",
   email: "jorge@pawbit.app",
+  phone: "+56 9 8765 4321",
   country: "Chile",
+  city: "Santiago",
   documentType: "RUT",
   documentNumber: "18.245.331-6",
   avatar:

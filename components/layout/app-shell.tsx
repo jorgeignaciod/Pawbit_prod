@@ -1,4 +1,5 @@
 import { BottomNavigation } from "@/components/navigation/bottom-navigation";
+import { EventDetailsDialog } from "@/components/calendar/event-details-dialog";
 import { TopBar } from "@/components/layout/top-bar";
 
 export function AppShell({
@@ -33,6 +34,7 @@ export function AppShell({
       />
       <div className="screen-padding">{children}</div>
       <BottomNavigation />
+      <EventDetailsDialog />
     </div>
   );
 }

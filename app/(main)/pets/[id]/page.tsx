@@ -4,9 +4,15 @@ import { Ellipsis, Pencil, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { PetNextEventCard } from "@/components/calendar/pet-next-event-card";
 import { calendarEventsMock } from "@/mocks/calendar-events.mock";
+import { petsMock } from "@/mocks/pets.mock";
 import { petsService } from "@/services/pets.service";
 import { formatAgeLabel } from "@/lib/utils";
+
+export function generateStaticParams() {
+  return petsMock.map((pet) => ({ id: pet.id }));
+}
 
 export default async function PetDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -73,14 +79,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
           <div className="mt-8">
             <p className="section-kicker">Próximo</p>
             {nextEvent ? (
-              <div className="surface-card mt-4 flex items-center gap-4 border-pawbit-error-border/50 bg-pawbit-error-bg/30 p-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-chip-active text-pawbit-primary">✚</div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[18px] font-semibold text-pawbit-text">{nextEvent.title.replace(/^.* de /, "")}</p>
-                  <p className="text-[15px] text-pawbit-primary">Mañana, 09:00 AM</p>
-                </div>
-                <span className="text-2xl text-pawbit-hint">›</span>
-              </div>
+              <PetNextEventCard event={nextEvent} />
             ) : null}
           </div>
 

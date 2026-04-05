@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
+const isCapacitorBuild = process.env.CAP_BUILD === "true";
+
 const nextConfig: NextConfig = {
+  output: isCapacitorBuild ? "export" : undefined,
   images: {
+    unoptimized: isCapacitorBuild,
     remotePatterns: [
       {
         protocol: "https",

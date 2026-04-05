@@ -4,11 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:mobile": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:ios:web": "CAP_BUILD=true next build",
+    "ios:add": "npx cap add ios",
+    "ios:sync": "npm run build:ios:web && npx cap sync ios",
+    "ios:dev:sync": "CAP_SERVER_URL=http://127.0.0.1:3000 npx cap sync ios",
+    "ios:open": "npx cap open ios"
   },
   "dependencies": {
+    "@capacitor/cli": "^7.6.1",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/ios": "^8.3.0",
     "@fontsource-variable/manrope": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
     "@hookform/resolvers": "^4.1.0",

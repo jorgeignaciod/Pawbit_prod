@@ -45,6 +45,14 @@ textarea::placeholder {
 }
 
 @layer components {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-area-top-offset {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+  }
+
   .app-frame {
     @apply mx-auto min-h-screen w-full max-w-md bg-pawbit-background;
   }

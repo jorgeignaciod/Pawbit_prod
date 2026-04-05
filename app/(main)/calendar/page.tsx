@@ -13,6 +13,7 @@ import { ErrorCard, LoadingCard } from "@/components/feedback/state-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NotificationButton } from "@/components/ui/notification-button";
 import { resolveDemoState } from "@/lib/demo-state";
+import { useEventDetailsStore } from "@/store/event-details-store";
 import {
   getEventsForDay,
   formatMonthLabel,
@@ -25,6 +26,7 @@ import {
 const days = ["LU", "MA", "MI", "JU", "VI", "SA", "DO"];
 
 export default function CalendarPage() {
+  const openEventDetails = useEventDetailsStore((state) => state.openEventDetails);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
@@ -173,7 +175,7 @@ export default function CalendarPage() {
                   selectedDayEvents.length ? (
                     <div className="space-y-3 pt-3">
                       {selectedDayEvents.map((event) => (
-                        <CalendarEventRow key={event.id} event={event} today={today} />
+                        <CalendarEventRow key={event.id} event={event} today={today} onSelect={openEventDetails} />
                       ))}
                     </div>
                   ) : (
@@ -191,7 +193,7 @@ export default function CalendarPage() {
                 ) : upcomingEvents.length ? (
                   <div className="space-y-3 pt-3">
                     {upcomingEvents.map((event) => (
-                      <CalendarEventRow key={event.id} event={event} today={today} />
+                      <CalendarEventRow key={event.id} event={event} today={today} onSelect={openEventDetails} />
                     ))}
                   </div>
                 ) : (
@@ -206,9 +208,9 @@ export default function CalendarPage() {
   );
 }
 
-function CalendarEventRow({ event, today }: { event: CalendarEvent; today: Date }) {
+function CalendarEventRow({ event, today, onSelect }: { event: CalendarEvent; today: Date; onSelect: (event: CalendarEvent) => void }) {
   return (
-    <div className="surface-card flex items-center gap-4 p-5">
+    <button type="button" onClick={() => onSelect(event)} className="surface-card flex w-full items-center gap-4 p-5 text-left">
       <div
         className={`flex h-14 w-14 items-center justify-center rounded-full ${
           event.type === "Vacuna"
@@ -227,6 +229,6 @@ function CalendarEventRow({ event, today }: { event: CalendarEvent; today: Date 
       <span className="rounded-pill bg-pawbit-error-bg px-3 py-2 text-sm font-semibold text-pawbit-primary">
         {formatUpcomingLabel(event.startDate, today)}
       </span>
-    </div>
+    </button>
   );
 }

@@ -11,6 +11,7 @@ interface AppStore {
   onboardingCompleted: boolean;
   user: User | null;
   login: (user?: User) => void;
+  updateProfile: (payload: Partial<User>) => void;
   completeOnboarding: (payload: Pick<User, "country" | "documentType" | "documentNumber">) => void;
   logout: () => void;
 }
@@ -26,6 +27,10 @@ export const useAppStore = create<AppStore>()(
           isAuthenticated: true,
           user
         }),
+      updateProfile: (payload) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...payload } : { ...userMock, ...payload }
+        })),
       completeOnboarding: (payload) =>
         set((state) => ({
           onboardingCompleted: true,

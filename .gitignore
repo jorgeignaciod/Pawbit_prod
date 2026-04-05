@@ -12,3 +12,9 @@ pnpm-debug.log*
 .env.production.local
 coverage
 dist
+out
+.vercel
+ios/App/Pods
+ios/App/App/public
+ios/App/App.xcworkspace/xcuserdata
+ios/App/App.xcodeproj/xcuserdata

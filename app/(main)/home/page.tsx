@@ -15,10 +15,12 @@ import { NotificationButton } from "@/components/ui/notification-button";
 import { calendarService } from "@/services/calendar.service";
 import { petsService } from "@/services/pets.service";
 import { DemoState, resolveDemoState } from "@/lib/demo-state";
+import { useEventDetailsStore } from "@/store/event-details-store";
 import { Pet } from "@/types/pet";
 import { CalendarEvent } from "@/types/calendar-event";
 
 export default function HomePage() {
+  const openEventDetails = useEventDetailsStore((state) => state.openEventDetails);
   const [pets, setPets] = useState<Pet[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
@@ -110,7 +112,12 @@ export default function HomePage() {
                   const suffix = index === 0 ? "En 5 días" : index === 1 ? "Mañana" : "18 feb";
 
                   return (
-                    <div key={event.id} className={`flex items-center gap-4 px-5 py-4 ${index < 2 ? "border-b border-pawbit-stroke/80" : ""}`}>
+                    <button
+                      key={event.id}
+                      type="button"
+                      onClick={() => openEventDetails(event)}
+                      className={`flex w-full items-center gap-4 px-5 py-4 text-left ${index < 2 ? "border-b border-pawbit-stroke/80" : ""}`}
+                    >
                       <div className={`flex h-14 w-14 items-center justify-center rounded-full ${tone}`}>
                         {index === 0 ? <Syringe className="h-6 w-6" /> : index === 1 ? <CalendarPlus className="h-6 w-6" /> : <HeartPulse className="h-6 w-6" />}
                       </div>
@@ -123,7 +130,7 @@ export default function HomePage() {
                       <p className={`text-[15px] font-semibold ${index === 0 ? "text-pawbit-blue" : index === 1 ? "text-pawbit-success" : "text-pawbit-muted"}`}>
                         {suffix}
                       </p>
-                    </div>
+                    </button>
                   );
                 })}
               </div>

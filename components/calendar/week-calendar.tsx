@@ -13,6 +13,7 @@ import {
   getEventsForDay,
   getWeekDays
 } from "@/lib/calendar";
+import { useEventDetailsStore } from "@/store/event-details-store";
 
 const weekdayLabels = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
 
@@ -33,6 +34,7 @@ export function WeekCalendar({
   onPreviousWeek: () => void;
   onNextWeek: () => void;
 }) {
+  const openEventDetails = useEventDetailsStore((state) => state.openEventDetails);
   const weekDays = getWeekDays(currentWeek);
   const today = new Date();
   const eventsPanelRef = useRef<HTMLElement | null>(null);
@@ -129,7 +131,7 @@ export function WeekCalendar({
             selectedDayEvents.length ? (
               <div className="space-y-3 pt-3">
                 {selectedDayEvents.map((event) => (
-                  <CalendarEventRow key={event.id} event={event} today={today} />
+                  <CalendarEventRow key={event.id} event={event} today={today} onSelect={openEventDetails} />
                 ))}
               </div>
             ) : (
@@ -147,7 +149,7 @@ export function WeekCalendar({
           ) : upcomingEvents.length ? (
             <div className="space-y-3 pt-3">
               {upcomingEvents.map((event) => (
-                <CalendarEventRow key={event.id} event={event} today={today} />
+                <CalendarEventRow key={event.id} event={event} today={today} onSelect={openEventDetails} />
               ))}
             </div>
           ) : (
@@ -161,9 +163,9 @@ export function WeekCalendar({
   );
 }
 
-function CalendarEventRow({ event, today }: { event: CalendarEvent; today: Date }) {
+function CalendarEventRow({ event, today, onSelect }: { event: CalendarEvent; today: Date; onSelect: (event: CalendarEvent) => void }) {
   return (
-    <div className="surface-card flex items-center gap-4 p-5">
+    <button type="button" onClick={() => onSelect(event)} className="surface-card flex w-full items-center gap-4 p-5 text-left">
       <div
         className={`flex h-14 w-14 items-center justify-center rounded-full ${
           event.type === "Control"
@@ -184,6 +186,6 @@ function CalendarEventRow({ event, today }: { event: CalendarEvent; today: Date 
       <span className="rounded-pill bg-pawbit-error-bg px-3 py-2 text-sm font-semibold text-pawbit-primary">
         {formatUpcomingLabel(event.startDate, today)}
       </span>
-    </div>
+    </button>
   );
 }

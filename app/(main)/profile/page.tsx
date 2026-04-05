@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import { BellRing, ChevronRight, CircleHelp, Lock, Mail, Pencil, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -11,10 +13,22 @@ export default function ProfilePage() {
   const router = useRouter();
   const user = useAppStore((state) => state.user);
   const logout = useAppStore((state) => state.logout);
+  const [notifications, setNotifications] = useState({
+    vaccines: true,
+    medication: true,
+    reminders: false
+  });
 
   function handleLogout() {
     logout();
-    router.push("/login");
+    router.replace("/login");
+  }
+
+  function toggleNotification(key: keyof typeof notifications) {
+    setNotifications((current) => ({
+      ...current,
+      [key]: !current[key]
+    }));
   }
 
   return (
@@ -45,18 +59,18 @@ export default function ProfilePage() {
         <section className="space-y-4">
           <p className="section-kicker">Cuenta</p>
           <div className="surface-card overflow-hidden p-0">
-            <ProfileRow icon={UserRound} label="Editar perfil" />
-            <ProfileRow icon={Mail} label="Correo" />
-            <ProfileRow icon={Lock} label="Cambiar contraseña" />
+            <ProfileRow icon={UserRound} label="Editar perfil" href="/profile/edit" />
+            <ProfileRow icon={Mail} label="Correo" href="/profile/email" />
+            <ProfileRow icon={Lock} label="Cambiar contraseña" href="/profile/password" />
           </div>
         </section>
 
         <section className="space-y-4">
           <p className="section-kicker">Notificaciones</p>
           <div className="surface-card overflow-hidden p-0">
-            <ToggleRow icon={BellRing} label="Vacunas" enabled />
-            <ToggleRow icon={CircleHelp} label="Medicación" enabled />
-            <ToggleRow icon={BellRing} label="Recordatorios" />
+            <ToggleRow icon={BellRing} label="Vacunas" enabled={notifications.vaccines} onToggle={() => toggleNotification("vaccines")} />
+            <ToggleRow icon={CircleHelp} label="Medicación" enabled={notifications.medication} onToggle={() => toggleNotification("medication")} />
+            <ToggleRow icon={BellRing} label="Recordatorios" enabled={notifications.reminders} onToggle={() => toggleNotification("reminders")} />
           </div>
         </section>
 
@@ -68,36 +82,62 @@ export default function ProfilePage() {
   );
 }
 
-function ProfileRow({ icon: Icon, label }: { icon: typeof Mail; label: string }) {
-  return (
-    <div className="flex items-center justify-between border-b border-pawbit-stroke px-5 py-5 last:border-none">
+function ProfileRow({
+  icon: Icon,
+  label,
+  href
+}: {
+  icon: typeof Mail;
+  label: string;
+  href?: string;
+}) {
+  const content = (
+    <>
       <div className="flex items-center gap-4">
         <Icon className="h-5 w-5 text-pawbit-primary" />
         <span className="text-[16px] font-medium text-pawbit-text">{label}</span>
       </div>
       <ChevronRight className="h-5 w-5 text-pawbit-hint" />
-    </div>
+    </>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="flex items-center justify-between border-b border-pawbit-stroke px-5 py-5 last:border-none">
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className="flex items-center justify-between border-b border-pawbit-stroke px-5 py-5 last:border-none">{content}</div>;
 }
 
 function ToggleRow({
   icon: Icon,
   label,
-  enabled = false
+  enabled = false,
+  onToggle
 }: {
   icon: typeof BellRing;
   label: string;
   enabled?: boolean;
+  onToggle: () => void;
 }) {
   return (
     <div className="flex items-center justify-between border-b border-pawbit-stroke px-5 py-5 last:border-none">
       <div className="flex items-center gap-4">
-        <Icon className="h-5 w-5 text-pawbit-primary" />
+        <Icon className={`h-5 w-5 transition-colors ${enabled ? "text-pawbit-primary" : "text-pawbit-disabled"}`} />
         <span className="text-[16px] font-medium text-pawbit-text">{label}</span>
       </div>
-      <div className={`flex h-9 w-16 items-center rounded-pill p-1 ${enabled ? "bg-pawbit-primary" : "bg-[#d9e1ef]"}`}>
-        <div className={`h-7 w-7 rounded-full bg-white shadow-soft transition ${enabled ? "ml-auto" : ""}`} />
-      </div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-pressed={enabled}
+        aria-label={`${enabled ? "Desactivar" : "Activar"} notificaciones de ${label.toLowerCase()}`}
+        className={`flex h-9 w-16 items-center rounded-pill p-1 transition-colors ${enabled ? "bg-pawbit-primary" : "bg-[#d9e1ef]"}`}
+      >
+        <div className={`h-7 w-7 rounded-full bg-white shadow-soft transition-all ${enabled ? "ml-auto" : ""}`} />
+      </button>
     </div>
   );
 }

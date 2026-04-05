@@ -46,7 +46,7 @@ export function TopBar({
     );
 
   return (
-    <header className={plain ? "pt-3" : "sticky top-0 z-20 bg-pawbit-background/96 backdrop-blur"}>
+    <header className={plain ? "safe-area-top-offset" : "safe-area-top sticky top-0 z-20 bg-pawbit-background/96 backdrop-blur"}>
       <div className="mx-auto grid h-14 max-w-md grid-cols-[auto_1fr_auto] items-center gap-4 px-6">
         <div className="flex items-center justify-start">{leftSlot}</div>
         {centerTitle ? (
