@@ -31,10 +31,15 @@ export default function PetsPage() {
       return;
     }
 
-    petsService.getPets().then((data) => {
-      setPets(viewState === "empty" ? [] : data);
-      setStatus("success");
-    });
+    petsService
+      .getPets()
+      .then((data) => {
+        setPets(viewState === "empty" ? [] : data);
+        setStatus("success");
+      })
+      .catch(() => {
+        setStatus("error");
+      });
   }, []);
 
   return (

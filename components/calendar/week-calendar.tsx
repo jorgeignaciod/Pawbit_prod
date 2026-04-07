@@ -81,7 +81,7 @@ export function WeekCalendar({
                 key={date.toISOString()}
                 type="button"
                 onClick={() => onSelectDate(date)}
-                className="space-y-2"
+                className="space-y-2 text-pawbit-text"
               >
                 <p className="text-[13px] font-semibold text-[#97a5be]">{weekdayLabels[index]}</p>
                 <div

@@ -8,9 +8,9 @@ import { es } from "date-fns/locale";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { calendarService } from "@/services/calendar.service";
+import { petsService } from "@/services/pets.service";
 import { CalendarEvent } from "@/types/calendar-event";
 import { ErrorCard, LoadingCard } from "@/components/feedback/state-card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { NotificationButton } from "@/components/ui/notification-button";
 import { resolveDemoState } from "@/lib/demo-state";
 import { useEventDetailsStore } from "@/store/event-details-store";
@@ -19,8 +19,7 @@ import {
   formatMonthLabel,
   formatUpcomingLabel,
   getEventsForMonth,
-  getMonthDays,
-  getUpcomingEvents
+  getMonthDays
 } from "@/lib/calendar";
 
 const days = ["LU", "MA", "MI", "JU", "VI", "SA", "DO"];
@@ -46,14 +45,19 @@ export default function CalendarPage() {
       return;
     }
 
-    calendarService.getEvents().then((data) => {
-      setEvents(state === "empty" ? [] : data);
-      setStatus("success");
-    });
+    petsService
+      .getPets()
+      .then(async (pets) => {
+        const data = pets.length ? await calendarService.getEvents() : [];
+        setEvents(state === "empty" ? [] : data);
+        setStatus("success");
+      })
+      .catch(() => {
+        setStatus("error");
+      });
   }, []);
 
   const monthEvents = useMemo(() => getEventsForMonth(events, currentMonth), [events, currentMonth]);
-  const upcomingEvents = useMemo(() => getUpcomingEvents(events).slice(0, 4), [events]);
   const monthDays = useMemo(() => getMonthDays(currentMonth), [currentMonth]);
   const selectedDayEvents = useMemo(() => (selectedDate ? getEventsForDay(events, selectedDate) : []), [events, selectedDate]);
   const today = new Date();
@@ -63,7 +67,7 @@ export default function CalendarPage() {
   }, [currentMonth]);
 
   useEffect(() => {
-    if (!selectedDate) return;
+    if (!selectedDate || selectedDayEvents.length === 0) return;
 
     requestAnimationFrame(() => {
       eventsPanelRef.current?.scrollIntoView({
@@ -71,7 +75,7 @@ export default function CalendarPage() {
         block: "start"
       });
     });
-  }, [selectedDate]);
+  }, [selectedDate, selectedDayEvents.length]);
 
   return (
     <AppShell
@@ -85,10 +89,10 @@ export default function CalendarPage() {
       <div className="space-y-5">
         <div className="rounded-pill bg-[#e9edf5] p-1 shadow-soft">
           <div className="grid grid-cols-2 gap-1">
-            <button className="rounded-pill bg-white px-4 py-3 text-[17px] font-semibold text-pawbit-primary shadow-soft">Mes</button>
             <Link href="/calendar/week" className="rounded-pill px-4 py-3 text-center text-[17px] font-medium text-pawbit-muted">
               Semana
             </Link>
+            <button className="rounded-pill bg-white px-4 py-3 text-[17px] font-semibold text-pawbit-primary shadow-soft">Mes</button>
           </div>
         </div>
 
@@ -127,7 +131,7 @@ export default function CalendarPage() {
                         onClick={() => {
                           setSelectedDate(date);
                         }}
-                        className="flex flex-col items-center gap-2"
+                        className="flex flex-col items-center gap-2 text-pawbit-text"
                       >
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full text-[18px] font-semibold ${
@@ -150,57 +154,28 @@ export default function CalendarPage() {
               </div>
             </section>
 
-            <section ref={eventsPanelRef} className="overflow-hidden rounded-t-[28px] border border-pawbit-stroke bg-white shadow-soft">
-              <div className="flex w-full items-center justify-between px-5 pb-3 pt-4 text-left">
-                <div>
-                  <p className="section-kicker">
-                    {selectedDate
-                      ? `Eventos del ${format(selectedDate, "d 'de' MMMM", { locale: es })}`
-                      : upcomingEvents.length === 0
-                        ? "Sin eventos próximos"
-                        : upcomingEvents.length === 1
-                          ? "Próximo evento"
-                          : "Próximos eventos"}
-                  </p>
-                  {selectedDate ? (
-                    <p className="mt-1 text-sm text-pawbit-muted">{selectedDayEvents.length ? `${selectedDayEvents.length} evento${selectedDayEvents.length === 1 ? "" : "s"}` : "Sin eventos para esta fecha"}</p>
-                  ) : null}
+            {selectedDate && selectedDayEvents.length ? (
+              <section ref={eventsPanelRef} className="overflow-hidden rounded-t-[28px] border border-pawbit-stroke bg-white shadow-soft">
+                <div className="flex w-full items-center justify-between px-5 pb-3 pt-4 text-left">
+                  <div>
+                    <p className="section-kicker">{`Eventos del ${format(selectedDate, "d 'de' MMMM", { locale: es })}`}</p>
+                    <p className="mt-1 text-sm text-pawbit-muted">
+                      {selectedDayEvents.length} evento{selectedDayEvents.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mx-auto mb-1 h-1.5 w-14 rounded-full bg-pawbit-stroke" />
+                <div className="mx-auto mb-1 h-1.5 w-14 rounded-full bg-pawbit-stroke" />
 
-              <div className={`px-5 pb-5 ${selectedDate ? "max-h-[360px] overflow-y-auto" : ""}`}>
-                {selectedDate ? (
-                  selectedDayEvents.length ? (
-                    <div className="space-y-3 pt-3">
-                      {selectedDayEvents.map((event) => (
-                        <CalendarEventRow key={event.id} event={event} today={today} onSelect={openEventDetails} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="pt-3">
-                      <EmptyState
-                        title="Sin eventos para este día"
-                        description="Todavía no hay vacunas, controles o recordatorios en la fecha seleccionada."
-                        actionLabel="Registrar evento"
-                        onAction={() => {
-                          window.location.href = "/register";
-                        }}
-                      />
-                    </div>
-                  )
-                ) : upcomingEvents.length ? (
+                <div className="max-h-[360px] overflow-y-auto px-5 pb-5">
                   <div className="space-y-3 pt-3">
-                    {upcomingEvents.map((event) => (
+                    {selectedDayEvents.map((event) => (
                       <CalendarEventRow key={event.id} event={event} today={today} onSelect={openEventDetails} />
                     ))}
                   </div>
-                ) : (
-                  <p className="rounded-[22px] bg-pawbit-background px-5 py-4 text-sm text-pawbit-muted">No hay eventos futuros para mostrar.</p>
-                )}
-              </div>
-            </section>
+                </div>
+              </section>
+            ) : null}
           </>
         ) : null}
       </div>

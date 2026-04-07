@@ -37,11 +37,15 @@ export function PetHealthPageClient({ petId }: { petId: string }) {
       return;
     }
 
-    Promise.all([petsService.getPetById(petId), recordsService.getRecordsByPetId(petId)]).then(([petData, recordsData]) => {
-      setPet(petData);
-      setRecords(nextViewState === "empty" ? [] : recordsData);
-      setStatus("success");
-    });
+    Promise.all([petsService.getPetById(petId), recordsService.getRecordsByPetId(petId)])
+      .then(([petData, recordsData]) => {
+        setPet(petData);
+        setRecords(nextViewState === "empty" ? [] : recordsData);
+        setStatus("success");
+      })
+      .catch(() => {
+        setStatus("error");
+      });
   }, [petId]);
 
   const visibleRecords = filter === "Todos" ? records : records.filter((record) => record.type === filter);

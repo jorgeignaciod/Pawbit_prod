@@ -13,6 +13,7 @@ import { SelectField } from "@/components/forms/select-field";
 import { AppShell } from "@/components/layout/app-shell";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { CompactConfirmationDialog } from "@/components/ui/compact-confirmation-dialog";
 import { useAppStore } from "@/store/app-store";
 
 const countrySchema = z.enum(COUNTRY_OPTIONS);
@@ -92,12 +93,6 @@ export default function EditProfilePage() {
       topBarAction={<div className="h-12 w-12" />}
     >
       <div className="space-y-6">
-        {saved ? (
-          <div className="rounded-[22px] bg-pawbit-success-bg px-5 py-4 text-sm text-pawbit-text">
-            Tu perfil se actualizo correctamente.
-          </div>
-        ) : null}
-
         <form className="surface-card space-y-5 p-5" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-1">
             <h2 className="text-[22px] font-semibold text-pawbit-text">Informacion personal</h2>
@@ -155,6 +150,13 @@ export default function EditProfilePage() {
           <PrimaryButton type="submit">Guardar cambios</PrimaryButton>
         </form>
       </div>
+      <CompactConfirmationDialog
+        open={saved}
+        title="Tu perfil se actualizó correctamente"
+        description="Tus datos ya quedaron guardados en la aplicación."
+        onConfirm={() => setSaved(false)}
+        onClose={() => setSaved(false)}
+      />
     </AppShell>
   );
 }

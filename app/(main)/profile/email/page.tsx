@@ -11,6 +11,7 @@ import { FormField } from "@/components/forms/form-field";
 import { AppShell } from "@/components/layout/app-shell";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { CompactConfirmationDialog } from "@/components/ui/compact-confirmation-dialog";
 import { useAppStore } from "@/store/app-store";
 
 const emailSchema = z
@@ -82,12 +83,6 @@ export default function EditEmailPage() {
       topBarAction={<div className="h-12 w-12" />}
     >
       <div className="space-y-6">
-        {saved ? (
-          <div className="rounded-[22px] bg-pawbit-success-bg px-5 py-4 text-sm text-pawbit-text">
-            Tu correo se actualizo correctamente.
-          </div>
-        ) : null}
-
         <form className="surface-card space-y-5 p-5" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-1">
             <h2 className="text-[22px] font-semibold text-pawbit-text">Correo de acceso</h2>
@@ -115,6 +110,13 @@ export default function EditEmailPage() {
           <PrimaryButton type="submit">Guardar correo</PrimaryButton>
         </form>
       </div>
+      <CompactConfirmationDialog
+        open={saved}
+        title="Tu correo se actualizó correctamente"
+        description="A partir de ahora podrás usar este correo para ingresar."
+        onConfirm={() => setSaved(false)}
+        onClose={() => setSaved(false)}
+      />
     </AppShell>
   );
 }

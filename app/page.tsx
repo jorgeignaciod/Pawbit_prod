@@ -10,7 +10,6 @@ export default function RootPage() {
   const router = useRouter();
   const mounted = useMounted();
   const isAuthenticated = useAppStore((state) => state.isAuthenticated);
-  const onboardingCompleted = useAppStore((state) => state.onboardingCompleted);
 
   useEffect(() => {
     if (!mounted) {
@@ -22,13 +21,8 @@ export default function RootPage() {
       return;
     }
 
-    if (!onboardingCompleted) {
-      router.replace("/onboarding");
-      return;
-    }
-
     router.replace("/home");
-  }, [isAuthenticated, mounted, onboardingCompleted, router]);
+  }, [isAuthenticated, mounted, router]);
 
   return <main className="app-frame" />;
 }

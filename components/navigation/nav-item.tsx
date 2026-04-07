@@ -12,7 +12,8 @@ export function NavItem({
   icon: Icon
 }: (typeof bottomNavigationItems)[number]) {
   const pathname = usePathname();
-  const active = pathname === href || pathname.startsWith(`${href}/`);
+  const isCalendarItem = href === "/calendar/week";
+  const active = isCalendarItem ? pathname.startsWith("/calendar") : pathname === href || pathname.startsWith(`${href}/`);
   const isRegister = href === "/register";
 
   return (

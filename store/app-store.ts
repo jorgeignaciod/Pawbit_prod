@@ -12,7 +12,7 @@ interface AppStore {
   user: User | null;
   login: (user?: User) => void;
   updateProfile: (payload: Partial<User>) => void;
-  completeOnboarding: (payload: Pick<User, "country" | "documentType" | "documentNumber">) => void;
+  completeOnboarding: (payload: Partial<User>) => void;
   logout: () => void;
 }
 
@@ -20,11 +20,12 @@ export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
       isAuthenticated: false,
-      onboardingCompleted: false,
+      onboardingCompleted: true,
       user: null,
       login: (user = userMock) =>
         set({
           isAuthenticated: true,
+          onboardingCompleted: true,
           user
         }),
       updateProfile: (payload) =>
@@ -39,7 +40,7 @@ export const useAppStore = create<AppStore>()(
       logout: () =>
         set({
           isAuthenticated: false,
-          onboardingCompleted: false,
+          onboardingCompleted: true,
           user: null
         })
     }),

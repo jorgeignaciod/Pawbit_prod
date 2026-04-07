@@ -11,6 +11,7 @@ import { FormField } from "@/components/forms/form-field";
 import { AppShell } from "@/components/layout/app-shell";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { CompactConfirmationDialog } from "@/components/ui/compact-confirmation-dialog";
 
 const passwordSchema = z
   .object({
@@ -74,12 +75,6 @@ export default function EditPasswordPage() {
       topBarAction={<div className="h-12 w-12" />}
     >
       <div className="space-y-6">
-        {saved ? (
-          <div className="rounded-[22px] bg-pawbit-success-bg px-5 py-4 text-sm text-pawbit-text">
-            Tu contraseña se actualizo correctamente.
-          </div>
-        ) : null}
-
         <form className="surface-card space-y-5 p-5" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-1">
             <h2 className="text-[22px] font-semibold text-pawbit-text">Seguridad de la cuenta</h2>
@@ -113,6 +108,13 @@ export default function EditPasswordPage() {
           <PrimaryButton type="submit">Guardar contraseña</PrimaryButton>
         </form>
       </div>
+      <CompactConfirmationDialog
+        open={saved}
+        title="Tu contraseña se actualizó correctamente"
+        description="Tu cuenta ya quedó protegida con la nueva contraseña."
+        onConfirm={() => setSaved(false)}
+        onClose={() => setSaved(false)}
+      />
     </AppShell>
   );
 }

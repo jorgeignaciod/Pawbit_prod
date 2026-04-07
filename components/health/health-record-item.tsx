@@ -10,7 +10,8 @@ const iconMap = {
   Alergia: FileText,
   Diagnóstico: FileText,
   Tratamiento: FileText,
-  Peso: Weight
+  Peso: Weight,
+  Nota: FileText
 } as const;
 
 export function HealthRecordItem({ record }: { record: HealthRecord }) {
@@ -35,9 +36,23 @@ export function HealthRecordItem({ record }: { record: HealthRecord }) {
           <p className="mt-1 text-[15px] text-pawbit-muted">{format(new Date(record.date), "dd MMM yyyy", { locale: es })}</p>
         </div>
         <span className={`rounded-pill px-3 py-2 text-sm font-semibold ${badgeClass}`}>
-          {record.type === "Vacuna" ? "Completado" : record.type === "Peso" ? "9,4 kg" : "Notas"}
+          {record.type === "Vacuna"
+            ? "Completado"
+            : record.type === "Peso"
+              ? `${getWeightLabel(record)} kg`
+              : record.type === "Nota"
+                ? "Nota"
+                : record.type === "Tratamiento"
+                  ? "Activo"
+                  : "Detalle"}
         </span>
       </div>
     </article>
   );
+}
+
+function getWeightLabel(record: HealthRecord) {
+  const metadata = record.metadata as { weightKg?: number } | undefined;
+
+  return metadata?.weightKg ?? "--";
 }

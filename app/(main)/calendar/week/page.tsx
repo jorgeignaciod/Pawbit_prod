@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { WeekCalendar } from "@/components/calendar/week-calendar";
 import { NotificationButton } from "@/components/ui/notification-button";
 import { calendarService } from "@/services/calendar.service";
+import { petsService } from "@/services/pets.service";
 import { DemoState, resolveDemoState } from "@/lib/demo-state";
 import { CalendarEvent } from "@/types/calendar-event";
 import { getEventsForWeek, getUpcomingEvents } from "@/lib/calendar";
@@ -37,10 +38,16 @@ export default function CalendarWeekPage() {
       return;
     }
 
-    calendarService.getEvents().then((data) => {
-      setEvents(nextViewState === "empty" ? [] : data);
-      setStatus("success");
-    });
+    petsService
+      .getPets()
+      .then(async (pets) => {
+        const data = pets.length ? await calendarService.getEvents() : [];
+        setEvents(nextViewState === "empty" ? [] : data);
+        setStatus("success");
+      })
+      .catch(() => {
+        setStatus("error");
+      });
   }, []);
 
   const visibleWeekEvents = useMemo(() => getEventsForWeek(events, currentWeek), [events, currentWeek]);
@@ -62,10 +69,10 @@ export default function CalendarWeekPage() {
       <div className="space-y-5">
         <div className="rounded-pill bg-[#fdeff0] p-1 shadow-soft">
           <div className="grid grid-cols-2 gap-1">
+            <button className="rounded-pill bg-white px-4 py-3 text-[17px] font-semibold text-pawbit-primary shadow-soft">Semana</button>
             <Link href="/calendar" className="rounded-pill px-4 py-3 text-center text-[17px] font-medium text-pawbit-muted">
               Mes
             </Link>
-            <button className="rounded-pill bg-white px-4 py-3 text-[17px] font-semibold text-pawbit-primary shadow-soft">Semana</button>
           </div>
         </div>
 
@@ -76,19 +83,15 @@ export default function CalendarWeekPage() {
         {status === "loading" ? <LoadingCard label="Cargando semana en curso..." /> : null}
         {status === "error" ? <ErrorCard title="No pudimos cargar el calendario" description="Reintenta para recuperar los eventos de la semana." onRetry={() => window.location.reload()} /> : null}
         {status === "success" ? (
-          visibleWeekEvents.length || upcomingEvents.length ? (
-            <WeekCalendar
-              currentWeek={currentWeek}
-              visibleEvents={visibleWeekEvents}
-              upcomingEvents={upcomingEvents}
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-              onPreviousWeek={() => setCurrentWeek((current) => addWeeks(current, -1))}
-              onNextWeek={() => setCurrentWeek((current) => addWeeks(current, 1))}
-            />
-          ) : (
-            <EmptyState title="Sin eventos en esta semana" description="Cuando agregues vacunas, controles o recordatorios aparecerán aquí." />
-          )
+          <WeekCalendar
+            currentWeek={currentWeek}
+            visibleEvents={visibleWeekEvents}
+            upcomingEvents={upcomingEvents}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            onPreviousWeek={() => setCurrentWeek((current) => addWeeks(current, -1))}
+            onNextWeek={() => setCurrentWeek((current) => addWeeks(current, 1))}
+          />
         ) : null}
       </div>
     </AppShell>

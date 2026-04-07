@@ -1,22 +1,30 @@
+export const dynamic = "force-dynamic";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Ellipsis, Pencil, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { PetNextEventCard } from "@/components/calendar/pet-next-event-card";
 import { calendarEventsMock } from "@/mocks/calendar-events.mock";
-import { petsMock } from "@/mocks/pets.mock";
-import { petsService } from "@/services/pets.service";
 import { formatAgeLabel } from "@/lib/utils";
-
-export function generateStaticParams() {
-  return petsMock.map((pet) => ({ id: pet.id }));
-}
+import { authService } from "@/server/auth/auth.service";
+import { SESSION_COOKIE_NAME } from "@/server/auth/session";
+import { petRepository } from "@/server/pets/pet.repository";
 
 export default async function PetDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const pet = await petsService.getPetById(id);
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const currentUser = await authService.getUserBySessionToken(sessionToken);
+
+  if (!currentUser) {
+    notFound();
+  }
+
+  const pet = await petRepository.findByIdForUser(id, currentUser.id);
 
   if (!pet) {
     notFound();
@@ -26,22 +34,32 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <AppShell
-      title="Gus"
+      title={pet.name}
       subtitle="Detalle de Mascota"
       chrome="plain"
       hideTopBarTitle
+      topBarLeading={
+        <Link href="/pets" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
+          <ArrowLeft className="h-5 w-5 text-pawbit-text" />
+        </Link>
+      }
       topBarAction={
-        <button type="button" className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">
-          <Ellipsis className="h-5 w-5" />
+        <button type="button" className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
+          <Ellipsis className="h-5 w-5 text-pawbit-text" />
         </button>
       }
     >
       <div className="space-y-0">
-        <div className="relative -mx-2 overflow-hidden rounded-[32px]">
-          <Image src={pet.avatar} alt={pet.name} width={800} height={640} className="h-[330px] w-full object-cover" />
-          <Link href="/pets" className="absolute left-5 top-5 flex h-12 w-12 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+        <div className="surface-card flex min-h-[290px] items-center justify-center overflow-hidden rounded-[32px] bg-[#f6f1f0] p-8">
+          <div className="relative flex h-[220px] w-full max-w-[260px] items-center justify-center rounded-[28px] bg-[#f6f1f0] p-6 shadow-soft">
+            <Image
+              src={pet.avatar}
+              alt={pet.name}
+              width={320}
+              height={320}
+              className="h-full w-full object-contain"
+            />
+          </div>
         </div>
 
         <section className="-mt-7 rounded-t-[34px] bg-pawbit-background px-6 pb-6 pt-6">
@@ -54,13 +72,13 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
                 </div>
                 <p className="text-[15px] text-pawbit-muted">
                   {pet.species}
-                  {pet.microchipNumber ? ` · Microchip: ${pet.microchipNumber}` : ""}
+                  {pet.microchipNumber ? ` - Microchip: ${pet.microchipNumber}` : ""}
                 </p>
               </div>
             </div>
-            <button type="button" className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral">
+            <Link href={`/pets/${pet.id}/edit`} className="flex h-14 w-14 items-center justify-center rounded-full bg-pawbit-primary text-white shadow-coral">
               <Pencil className="h-5 w-5" />
-            </button>
+            </Link>
           </div>
 
           <div className="mt-6 flex border-b border-pawbit-stroke">

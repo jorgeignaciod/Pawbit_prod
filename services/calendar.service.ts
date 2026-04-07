@@ -4,6 +4,6 @@ import { delay } from "@/lib/utils";
 export const calendarService = {
   async getEvents() {
     await delay(500);
-    return calendarEventsMock;
+    return [];
   }
 };

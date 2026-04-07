@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/ui/logo";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SelectField } from "@/components/forms/select-field";
+import { authService } from "@/services/auth.service";
 import { useAppStore } from "@/store/app-store";
 
 const onboardingSchema = z.object({
@@ -27,6 +29,8 @@ type OnboardingValues = z.infer<typeof onboardingSchema>;
 export default function OnboardingPage() {
   const router = useRouter();
   const completeOnboarding = useAppStore((state) => state.completeOnboarding);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(onboardingSchema),
@@ -38,9 +42,19 @@ export default function OnboardingPage() {
     mode: "onChange"
   });
 
-  function onSubmit(values: OnboardingValues) {
-    completeOnboarding(values);
-    router.push("/home");
+  async function onSubmit(values: OnboardingValues) {
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const user = await authService.completeOnboarding(values);
+      completeOnboarding(user);
+      router.push("/home");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "No pudimos guardar tus datos.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -58,6 +72,12 @@ export default function OnboardingPage() {
         </section>
 
         <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+          {errorMessage ? (
+            <div className="rounded-[22px] bg-pawbit-error-bg px-5 py-4 text-sm text-pawbit-text">
+              {errorMessage}
+            </div>
+          ) : null}
+
           <FormField label="País" error={form.formState.errors.country?.message}>
             <SelectField {...form.register("country")}>
               <option value="Chile">Chile</option>
@@ -77,7 +97,7 @@ export default function OnboardingPage() {
             <Input placeholder="18.245.331-6" {...form.register("documentNumber")} />
           </FormField>
 
-          <PrimaryButton type="submit" disabled={!form.formState.isValid} className="gap-2">
+          <PrimaryButton type="submit" disabled={!form.formState.isValid || submitting} className="gap-2">
             Continuar
             <ArrowRight className="h-5 w-5" />
           </PrimaryButton>

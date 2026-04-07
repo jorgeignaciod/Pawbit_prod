@@ -10,4 +10,7 @@ export interface User {
   documentType: DocumentType;
   documentNumber: string;
   avatar: string;
+  onboardingCompleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

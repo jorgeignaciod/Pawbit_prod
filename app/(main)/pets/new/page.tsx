@@ -13,8 +13,12 @@ import { FormField } from "@/components/forms/form-field";
 import { SearchableCombobox } from "@/components/forms/searchable-combobox";
 import { SelectField } from "@/components/forms/select-field";
 import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
+import { DateField } from "@/components/forms/date-field";
+import { petsService } from "@/services/pets.service";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { CompactConfirmationDialog } from "@/components/ui/compact-confirmation-dialog";
+import { useRouter } from "next/navigation";
 
 const petSchema = z
   .object({
@@ -22,6 +26,7 @@ const petSchema = z
     species: z.enum(["", "Perro", "Gato"]),
     breed: z.string(),
     sex: z.enum(["Macho", "Hembra"]),
+    birthDate: z.string().optional(),
     color: z.string().min(2, "Ingresa el color"),
     isNeutered: z.enum(["", "yes", "no"]),
     hasMicrochip: z.enum(["", "yes", "no"]),
@@ -73,9 +78,11 @@ const petSchema = z
 type PetFormValues = z.infer<typeof petSchema>;
 
 export default function NewPetPage() {
+  const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [createdPetName, setCreatedPetName] = useState<string | null>(null);
   const [saveError, setSaveError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [breedOptions, setBreedOptions] = useState<string[]>([]);
   const [breedsLoading, setBreedsLoading] = useState(false);
@@ -87,6 +94,7 @@ export default function NewPetPage() {
       species: "",
       breed: "",
       sex: "Macho",
+      birthDate: "",
       color: "",
       isNeutered: "",
       hasMicrochip: "",
@@ -134,15 +142,32 @@ export default function NewPetPage() {
     };
   }, [form, selectedSpecies]);
 
-  async function onSubmit() {
+  async function onSubmit(values: PetFormValues) {
     setSaveError(false);
+    setErrorMessage(null);
     setSaving(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      setSubmitted(true);
+      const numericWeight = values.weight?.trim() ? Number(values.weight.replace(",", ".")) : null;
+
+      const createdPet = await petsService.createPet({
+        name: values.name,
+        species: values.species as "Perro" | "Gato",
+        breed: values.breed,
+        sex: values.sex,
+        birthDate: values.birthDate || "",
+        weight: Number.isFinite(numericWeight as number) ? numericWeight : null,
+        color: values.color,
+        avatar: "",
+        neutered: values.isNeutered === "yes",
+        microchipNumber: values.hasMicrochip === "yes" ? values.microchipNumber ?? "" : "",
+        notes: ""
+      });
+      setCreatedPetName(createdPet.name);
+      router.prefetch("/pets");
     } catch {
       setSaveError(true);
+      setErrorMessage("Revisa los datos e intenta nuevamente.");
     } finally {
       setSaving(false);
     }
@@ -171,13 +196,7 @@ export default function NewPetPage() {
     >
       <div className="space-y-6">
         {saving ? <LoadingCard label="Guardando nueva mascota..." /> : null}
-        {saveError ? <ErrorCard title="No pudimos guardar la mascota" description="Revisa los datos e intenta nuevamente." /> : null}
-        {submitted ? (
-          <div className="rounded-[22px] bg-pawbit-success-bg px-5 py-4 text-sm text-pawbit-text">
-            La mascota se creó correctamente. El siguiente paso es comenzar a registrar su salud.
-          </div>
-        ) : null}
-
+        {saveError ? <ErrorCard title="No pudimos guardar la mascota" description={errorMessage ?? "Revisa los datos e intenta nuevamente."} /> : null}
         <form className="surface-card space-y-5 p-5" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField label="Fotografía" helper="Opcional. Puedes agregarla ahora o después.">
             <label className="block cursor-pointer">
@@ -228,6 +247,10 @@ export default function NewPetPage() {
               <option value="Macho">Macho</option>
               <option value="Hembra">Hembra</option>
             </SelectField>
+          </FormField>
+
+          <FormField label="Fecha de nacimiento" helper="Opcional por ahora." error={form.formState.errors.birthDate?.message}>
+            <DateField {...form.register("birthDate")} />
           </FormField>
 
           <FormField label="Color" required error={form.formState.errors.color?.message}>
@@ -294,6 +317,18 @@ export default function NewPetPage() {
           </PrimaryButton>
         </form>
       </div>
+
+      <CompactConfirmationDialog
+        open={Boolean(createdPetName)}
+        title={createdPetName ? `Hemos creado correctamente a ${createdPetName}` : ""}
+        description="Ya puedes verlo en tu listado y empezar a registrar su información de salud."
+        confirmLabel="Continuar"
+        onConfirm={() => {
+          setCreatedPetName(null);
+          router.push("/pets");
+        }}
+        onClose={() => setCreatedPetName(null)}
+      />
     </AppShell>
   );
 }

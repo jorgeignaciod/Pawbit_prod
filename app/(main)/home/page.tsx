@@ -4,7 +4,8 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CalendarPlus, ClipboardList, HeartPulse, Scale, ShieldCheck, Syringe } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadingCard, ErrorCard } from "@/components/feedback/state-card";
@@ -12,14 +13,17 @@ import { PetSummaryCard } from "@/components/pets/pet-summary-card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NotificationButton } from "@/components/ui/notification-button";
+import { formatUpcomingLabel } from "@/lib/calendar";
 import { calendarService } from "@/services/calendar.service";
 import { petsService } from "@/services/pets.service";
 import { DemoState, resolveDemoState } from "@/lib/demo-state";
+import { useAppStore } from "@/store/app-store";
 import { useEventDetailsStore } from "@/store/event-details-store";
 import { Pet } from "@/types/pet";
 import { CalendarEvent } from "@/types/calendar-event";
 
 export default function HomePage() {
+  const user = useAppStore((state) => state.user);
   const openEventDetails = useEventDetailsStore((state) => state.openEventDetails);
   const [pets, setPets] = useState<Pet[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -28,6 +32,8 @@ export default function HomePage() {
   const selectedPet = useMemo(() => pets[0] ?? null, [pets]);
   const petsCount = pets.length;
   const eventsCount = events.length;
+  const visibleEvents = useMemo(() => events.slice(0, 2), [events]);
+  const firstName = useMemo(() => user?.name?.trim().split(/\s+/)[0] ?? "", [user?.name]);
 
   useEffect(() => {
     const nextViewState = resolveDemoState(new URLSearchParams(window.location.search).get("state"));
@@ -43,11 +49,19 @@ export default function HomePage() {
       return;
     }
 
-    Promise.all([petsService.getPets(), calendarService.getEvents()]).then(([petsData, eventsData]) => {
-      setPets(nextViewState === "empty" ? [] : petsData);
-      setEvents(nextViewState === "empty" ? [] : eventsData);
-      setStatus("success");
-    });
+    petsService
+      .getPets()
+      .then(async (petsData) => {
+        const nextPets = nextViewState === "empty" ? [] : petsData;
+        const eventsData = nextPets.length ? await calendarService.getEvents() : [];
+
+        setPets(nextPets);
+        setEvents(nextViewState === "empty" ? [] : eventsData);
+        setStatus("success");
+      })
+      .catch(() => {
+        setStatus("error");
+      });
   }, []);
 
   return (
@@ -56,7 +70,7 @@ export default function HomePage() {
       subtitle="Inicio"
       chrome="plain"
       hideTopBarTitle
-      topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">Hola, Jorge</h1>}
+      topBarLeading={<h1 className="text-[28px] font-semibold tracking-[-0.03em] text-pawbit-text">{firstName ? `Hola, ${firstName}` : "Hola"}</h1>}
       topBarAction={<NotificationButton />}
     >
       <div className="space-y-6">
@@ -100,45 +114,19 @@ export default function HomePage() {
               }
             />
 
-            {events.length ? (
-              <div className="surface-card overflow-hidden p-0">
-                {events.slice(0, 3).map((event, index) => {
-                  const tone =
-                    index === 0
-                      ? "bg-pawbit-blue-bg text-pawbit-blue"
-                      : index === 1
-                        ? "bg-pawbit-success-bg text-pawbit-success"
-                        : "bg-[#fff1df] text-[#de8b14]";
-                  const suffix = index === 0 ? "En 5 días" : index === 1 ? "Mañana" : "18 feb";
-
-                  return (
-                    <button
-                      key={event.id}
-                      type="button"
-                      onClick={() => openEventDetails(event)}
-                      className={`flex w-full items-center gap-4 px-5 py-4 text-left ${index < 2 ? "border-b border-pawbit-stroke/80" : ""}`}
-                    >
-                      <div className={`flex h-14 w-14 items-center justify-center rounded-full ${tone}`}>
-                        {index === 0 ? <Syringe className="h-6 w-6" /> : index === 1 ? <CalendarPlus className="h-6 w-6" /> : <HeartPulse className="h-6 w-6" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-[18px] font-semibold text-pawbit-text">{event.title.replace(/^.* de /, "")}</p>
-                        <p className="text-[15px] text-pawbit-muted">
-                          {index === 0 ? "Recordatorio médico" : index === 1 ? "Preventivo" : "Chequeo anual"}
-                        </p>
-                      </div>
-                      <p className={`text-[15px] font-semibold ${index === 0 ? "text-pawbit-blue" : index === 1 ? "text-pawbit-success" : "text-pawbit-muted"}`}>
-                        {suffix}
-                      </p>
-                    </button>
-                  );
-                })}
+            {visibleEvents.length ? (
+              <div className="space-y-3">
+                {visibleEvents.map((event) => (
+                  <HomeEventRow key={event.id} event={event} onSelect={openEventDetails} />
+                ))}
               </div>
             ) : (
               <EmptyState
-                title={petsCount > 1 ? "No hay eventos próximos para tus mascotas" : "No hay eventos próximos para tu mascota"}
+                title={petsCount === 0 ? "Aún no hay eventos para mostrar" : petsCount > 1 ? "No hay eventos próximos para tus mascotas" : "No hay eventos próximos para tu mascota"}
                 description={
-                  petsCount > 1
+                  petsCount === 0
+                    ? "Cuando registres tu primera mascota y agregues controles o vacunas, el calendario empezará a llenarse."
+                    : petsCount > 1
                     ? "Cuando registres vacunas o controles de tus mascotas aparecerán aquí."
                     : "Cuando registres vacunas o controles de tu mascota aparecerán aquí."
                 }
@@ -149,39 +137,7 @@ export default function HomePage() {
             {pets.length ? (
               <div className="space-y-4">
                 {pets.map((pet) => (
-                  <Link
-                    key={pet.id}
-                    href={`/pets/${pet.id}`}
-                    className="surface-card block bg-pawbit-surface p-6"
-                  >
-                    <div className="space-y-5">
-                      <h3 className="text-[22px] font-medium tracking-[-0.03em] text-pawbit-text">{pet.name}</h3>
-
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                          <ShieldCheck className="h-8 w-8 text-[#20b887]" strokeWidth={2.2} />
-                          <p className="text-[18px] text-pawbit-text">
-                            Vacunas: <span className="font-medium">Al día</span> <span aria-hidden="true">✅</span>
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                          <Scale className="h-8 w-8 text-pawbit-primary" strokeWidth={2.2} />
-                          <p className="text-[18px] text-pawbit-text">
-                            Último peso: <span className="font-medium">{pet.id === "pet-1" ? "12,4 kg" : "5,8 kg"}</span>{" "}
-                            <span className="text-[#91a0bb]">(hace {pet.id === "pet-1" ? "12" : "20"} días)</span>
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                          <ClipboardList className="h-8 w-8 text-[#91a0bb]" strokeWidth={2.2} />
-                          <p className="text-[18px] text-pawbit-text">
-                            Último registro: <span className="font-medium">{pet.id === "pet-1" ? "ayer" : "hace 4 días"}</span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  <PetSummaryCard key={pet.id} pet={pet} />
                 ))}
               </div>
             ) : (
@@ -198,5 +154,32 @@ export default function HomePage() {
         ) : null}
       </div>
     </AppShell>
+  );
+}
+
+function HomeEventRow({ event, onSelect }: { event: CalendarEvent; onSelect: (event: CalendarEvent) => void }) {
+  const today = new Date();
+
+  return (
+    <button type="button" onClick={() => onSelect(event)} className="surface-card flex w-full items-center gap-4 p-5 text-left">
+      <div
+        className={`flex h-14 w-14 items-center justify-center rounded-full ${
+          event.type === "Vacuna"
+            ? "bg-pawbit-blue-bg text-pawbit-blue"
+            : event.type === "Control"
+              ? "bg-[#fff1df] text-[#de8b14]"
+              : "bg-pawbit-error-bg text-pawbit-primary"
+        }`}
+      >
+        {event.type === "Vacuna" ? "💉" : event.type === "Control" ? "✚" : "⏰"}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[18px] font-semibold text-pawbit-text">{event.title}</p>
+        <p className="text-[15px] text-pawbit-muted">{format(parseISO(event.startDate), "EEEE d MMM, HH:mm", { locale: es })}</p>
+      </div>
+      <span className="rounded-pill bg-pawbit-error-bg px-3 py-2 text-sm font-semibold text-pawbit-primary">
+        {formatUpcomingLabel(event.startDate, today)}
+      </span>
+    </button>
   );
 }

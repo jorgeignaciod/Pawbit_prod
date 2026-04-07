@@ -6,13 +6,11 @@ import { formatAgeLabel } from "@/lib/utils";
 import { Pet } from "@/types/pet";
 
 export function PetCard({ pet }: { pet: Pet }) {
-  const chips =
-    pet.id === "pet-1"
-      ? [
-          { label: "Vacunas al día", className: "bg-pawbit-success-bg text-pawbit-success" },
-          { label: "Peso ok", className: "bg-pawbit-blue-bg text-pawbit-blue" }
-        ]
-      : [{ label: "1 pendiente", className: "bg-pawbit-error-bg text-pawbit-primary" }];
+  const meta = [
+    pet.species,
+    pet.birthDate ? formatAgeLabel(pet.birthDate) : null,
+    pet.weight > 0 ? `${pet.weight} kg` : null
+  ].filter(Boolean);
 
   return (
     <Link href={`/pets/${pet.id}`} className="surface-card flex items-center gap-4 p-5">
@@ -21,20 +19,19 @@ export function PetCard({ pet }: { pet: Pet }) {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="truncate text-[20px] leading-6 text-pawbit-text">{pet.name}</h2>
-            <p className="text-[15px] text-pawbit-muted">{pet.breed}</p>
+            <p className="text-[15px] text-pawbit-muted">{pet.breed || "Sin raza especificada"}</p>
           </div>
           <ChevronRight className="h-5 w-5 text-pawbit-hint" />
         </div>
-        <div className="flex flex-wrap gap-2">
-          {chips.map((chip) => (
-            <span key={chip.label} className={`rounded-pill px-3 py-1 text-sm font-medium ${chip.className}`}>
-              {chip.label}
-            </span>
-          ))}
-          <span className="rounded-pill bg-pawbit-chip-default px-3 py-1 text-sm font-medium text-pawbit-chip-default-text">
-            {formatAgeLabel(pet.birthDate)} · {pet.weight} kg
-          </span>
-        </div>
+        {meta.length ? (
+          <div className="flex flex-wrap gap-2">
+            {meta.map((label) => (
+              <span key={label} className="rounded-pill bg-pawbit-chip-default px-3 py-1 text-sm font-medium text-pawbit-chip-default-text">
+                {label}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </Link>
   );

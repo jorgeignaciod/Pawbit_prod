@@ -4,7 +4,8 @@ export type HealthRecordType =
   | "Alergia"
   | "Diagnóstico"
   | "Tratamiento"
-  | "Peso";
+  | "Peso"
+  | "Nota";
 
 export interface HealthRecord {
   id: string;
@@ -16,4 +17,5 @@ export interface HealthRecord {
   vetName: string;
   attachments: string[];
   nextDueDate?: string;
+  metadata?: unknown;
 }

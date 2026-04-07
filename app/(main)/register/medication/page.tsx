@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,10 +13,14 @@ import { ArrowLeft, ChevronDown, ChevronRight, Clock3, Pill } from "lucide-react
 import { AppShell } from "@/components/layout/app-shell";
 import { FormField } from "@/components/forms/form-field";
 import { ErrorCard, LoadingCard } from "@/components/feedback/state-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { resolveDemoState } from "@/lib/demo-state";
-import { petsMock } from "@/mocks/pets.mock";
 import { Input } from "@/components/ui/input";
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { CompactConfirmationDialog } from "@/components/ui/compact-confirmation-dialog";
+import { recordsService } from "@/services/records.service";
+import { petsService } from "@/services/pets.service";
+import { Pet } from "@/types/pet";
 
 const schema = z.object({
   petId: z.string().min(1, "Selecciona una mascota"),
@@ -31,6 +35,8 @@ type FormValues = z.infer<typeof schema>;
 export default function RegisterMedicationPage() {
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [petsStatus, setPetsStatus] = useState<"loading" | "error" | "success">("loading");
   const [scheduleReminder, setScheduleReminder] = useState(true);
   const [viewState] = useState(() =>
     typeof window === "undefined" ? "default" : resolveDemoState(new URLSearchParams(window.location.search).get("state"))
@@ -39,7 +45,7 @@ export default function RegisterMedicationPage() {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      petId: petsMock[0]?.id ?? "",
+      petId: "",
       medicationName: "",
       dose: "",
       frequency: "",
@@ -47,14 +53,46 @@ export default function RegisterMedicationPage() {
     }
   });
 
-  async function onSubmit() {
+  useEffect(() => {
+    petsService
+      .getPets()
+      .then((data) => {
+        setPets(data);
+        setPetsStatus("success");
+        if (data[0]) {
+          form.setValue("petId", data[0].id, { shouldValidate: true });
+        }
+      })
+      .catch(() => {
+        setPetsStatus("error");
+      });
+  }, [form]);
+
+  async function onSubmit(values: FormValues) {
     setSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    setSaving(false);
-    setSubmitted(true);
+    try {
+      await recordsService.createMedicationRecord({
+        petId: values.petId,
+        medicationName: values.medicationName,
+        dose: values.dose,
+        frequency: values.frequency,
+        notes: values.notes,
+        scheduleReminder
+      });
+      setSubmitted(true);
+      form.reset({
+        petId: values.petId,
+        medicationName: "",
+        dose: "",
+        frequency: "",
+        notes: ""
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
-  const activePet = petsMock.find((pet) => pet.id === form.watch("petId")) ?? petsMock[0];
+  const activePet = useMemo(() => pets.find((pet) => pet.id === form.watch("petId")) ?? pets[0] ?? null, [pets, form]);
 
   return (
     <AppShell
@@ -77,12 +115,20 @@ export default function RegisterMedicationPage() {
           <Link href="/register/note" className="rounded-pill bg-white px-6 py-3 text-[16px] font-medium text-pawbit-text shadow-soft">Nota</Link>
         </div>
 
-        {viewState === "loading" || saving ? <LoadingCard label="Guardando registro de medicación..." /> : null}
-        {viewState === "error" ? <ErrorCard title="No se pudo guardar la medicación" description="Revisa los datos e intenta nuevamente." /> : null}
-        {(viewState === "success" || submitted) && (
-          <div className="rounded-[22px] bg-pawbit-success-bg px-5 py-4 text-sm text-pawbit-text">Medicación registrada correctamente.</div>
-        )}
+        {viewState === "loading" || saving || petsStatus === "loading" ? <LoadingCard label="Guardando registro de medicación..." /> : null}
+        {viewState === "error" || petsStatus === "error" ? <ErrorCard title="No se pudo guardar la medicación" description="Revisa los datos e intenta nuevamente." /> : null}
+        {petsStatus === "success" && !activePet ? (
+          <EmptyState
+            title="No tienes mascotas para registrar"
+            description="Agrega una mascota primero para poder registrar medicación."
+            actionLabel="Añadir mascota"
+            onAction={() => {
+              window.location.href = "/pets/new";
+            }}
+          />
+        ) : null}
 
+        {petsStatus === "success" && activePet ? (
         <form className="surface-card space-y-5 p-5" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField label="Mascota" error={form.formState.errors.petId?.message}>
             <button type="button" className="flex w-full items-center gap-4 rounded-[22px] bg-pawbit-input-alt px-5 py-4">
@@ -149,7 +195,15 @@ export default function RegisterMedicationPage() {
             Guardar registro
           </PrimaryButton>
         </form>
+        ) : null}
       </div>
+      <CompactConfirmationDialog
+        open={submitted}
+        title="Medicación registrada correctamente"
+        description="Guardamos la indicación para que quede disponible en el historial."
+        onConfirm={() => setSubmitted(false)}
+        onClose={() => setSubmitted(false)}
+      />
     </AppShell>
   );
 }

@@ -10,7 +10,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const mounted = useMounted();
   const isAuthenticated = useAppStore((state) => state.isAuthenticated);
-  const onboardingCompleted = useAppStore((state) => state.onboardingCompleted);
 
   useEffect(() => {
     if (!mounted) {
@@ -19,15 +18,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
     if (!isAuthenticated) {
       router.replace("/login");
-      return;
     }
+  }, [isAuthenticated, mounted, router]);
 
-    if (!onboardingCompleted) {
-      router.replace("/onboarding");
-    }
-  }, [isAuthenticated, mounted, onboardingCompleted, router]);
-
-  if (!mounted || !isAuthenticated || !onboardingCompleted) {
+  if (!mounted || !isAuthenticated) {
     return <main className="app-frame" />;
   }
 
