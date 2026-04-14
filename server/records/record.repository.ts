@@ -3,15 +3,22 @@ import { MedicalRecordType } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { mapHealthRecord } from "@/server/records/record.mapper";
 import { CreateHealthRecordInput } from "@/server/records/record.schemas";
-import { createId } from "@/server/shared/ids";
+import { createToken } from "@/server/shared/ids";
 
 export const recordRepository = {
-  async findByPetIdForUser(petId: string, userId: string) {
+  async findByPetIdForUser(petToken: string, userId: number) {
     const records = await prisma.medicalRecord.findMany({
       where: {
-        petId,
         pet: {
+          token: petToken,
           userId
+        },
+      },
+      include: {
+        pet: {
+          select: {
+            token: true
+          }
         }
       },
       orderBy: {
@@ -22,10 +29,10 @@ export const recordRepository = {
     return records.map(mapHealthRecord);
   },
 
-  async createForUser(userId: string, input: CreateHealthRecordInput) {
+  async createForUser(userId: number, input: CreateHealthRecordInput) {
     const pet = await prisma.pet.findFirst({
       where: {
-        id: input.petId,
+        token: input.petId,
         userId
       }
     });
@@ -49,7 +56,7 @@ export const recordRepository = {
 
         return tx.medicalRecord.create({
           data: {
-            id: createId("record"),
+            token: createToken("record"),
             petId: pet.id,
             type: MedicalRecordType.PESO,
             title: "Control de peso",
@@ -58,6 +65,13 @@ export const recordRepository = {
             createdByUserId: userId,
             metadata: {
               weightKg: input.weight
+            }
+          },
+          include: {
+            pet: {
+              select: {
+                token: true
+              }
             }
           }
         });
@@ -69,7 +83,7 @@ export const recordRepository = {
     if (input.kind === "vaccine") {
       const record = await prisma.medicalRecord.create({
         data: {
-          id: createId("record"),
+          token: createToken("record"),
           petId: pet.id,
           type: MedicalRecordType.VACUNA,
           title: input.vaccineName,
@@ -81,6 +95,13 @@ export const recordRepository = {
             dose: input.dose,
             scheduleNextDose: input.scheduleNextDose
           }
+        },
+        include: {
+          pet: {
+            select: {
+              token: true
+            }
+          }
         }
       });
 
@@ -90,7 +111,7 @@ export const recordRepository = {
     if (input.kind === "medication") {
       const record = await prisma.medicalRecord.create({
         data: {
-          id: createId("record"),
+          token: createToken("record"),
           petId: pet.id,
           type: MedicalRecordType.TRATAMIENTO,
           title: input.medicationName,
@@ -102,6 +123,13 @@ export const recordRepository = {
             frequency: input.frequency,
             scheduleReminder: input.scheduleReminder
           }
+        },
+        include: {
+          pet: {
+            select: {
+              token: true
+            }
+          }
         }
       });
 
@@ -110,7 +138,7 @@ export const recordRepository = {
 
     const record = await prisma.medicalRecord.create({
       data: {
-        id: createId("record"),
+        token: createToken("record"),
         petId: pet.id,
         type: MedicalRecordType.NOTA,
         title: input.title,
@@ -119,6 +147,13 @@ export const recordRepository = {
         createdByUserId: userId,
         metadata: {
           tag: input.tag || null
+        }
+      },
+      include: {
+        pet: {
+          select: {
+            token: true
+          }
         }
       }
     });

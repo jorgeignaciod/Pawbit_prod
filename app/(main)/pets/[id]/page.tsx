@@ -18,7 +18,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const currentUser = await authService.getUserBySessionToken(sessionToken);
+  const currentUser = await authService.getStoredUserBySessionToken(sessionToken);
 
   if (!currentUser) {
     notFound();

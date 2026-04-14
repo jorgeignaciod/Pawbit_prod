@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "DocumentType" AS ENUM ('RUT', 'DNI');
 
@@ -28,9 +31,34 @@ CREATE TYPE "ReminderChannel" AS ENUM ('PUSH', 'EMAIL', 'IN_APP');
 -- CreateEnum
 CREATE TYPE "ReminderStatus" AS ENUM ('PENDING', 'SENT', 'FAILED', 'CANCELLED');
 
+-- CreateSequence
+CREATE SEQUENCE "User_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
+-- CreateSequence
+CREATE SEQUENCE "Session_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
+-- CreateSequence
+CREATE SEQUENCE "Pet_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
+-- CreateSequence
+CREATE SEQUENCE "MedicalRecord_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
+-- CreateSequence
+CREATE SEQUENCE "RecordAttachment_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
+-- CreateSequence
+CREATE SEQUENCE "Event_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
+-- CreateSequence
+CREATE SEQUENCE "EventReminder_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
+-- CreateSequence
+CREATE SEQUENCE "Notification_id_seq" START WITH 100 INCREMENT BY 1 MINVALUE 100;
+
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('"User_id_seq"'),
+    "token" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "phone" TEXT NOT NULL DEFAULT '',
@@ -49,8 +77,9 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Session" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('"Session_id_seq"'),
+    "token" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
     "tokenHash" TEXT NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -60,8 +89,9 @@ CREATE TABLE "Session" (
 
 -- CreateTable
 CREATE TABLE "Pet" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('"Pet_id_seq"'),
+    "token" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "species" "PetSpecies" NOT NULL,
     "breed" TEXT NOT NULL,
@@ -81,8 +111,9 @@ CREATE TABLE "Pet" (
 
 -- CreateTable
 CREATE TABLE "MedicalRecord" (
-    "id" TEXT NOT NULL,
-    "petId" TEXT NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('"MedicalRecord_id_seq"'),
+    "token" TEXT NOT NULL,
+    "petId" INTEGER NOT NULL,
     "type" "MedicalRecordType" NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL DEFAULT '',
@@ -90,7 +121,7 @@ CREATE TABLE "MedicalRecord" (
     "vetName" TEXT,
     "nextDueDate" TIMESTAMP(3),
     "metadata" JSONB,
-    "createdByUserId" TEXT NOT NULL,
+    "createdByUserId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -99,8 +130,9 @@ CREATE TABLE "MedicalRecord" (
 
 -- CreateTable
 CREATE TABLE "RecordAttachment" (
-    "id" TEXT NOT NULL,
-    "recordId" TEXT NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('"RecordAttachment_id_seq"'),
+    "token" TEXT NOT NULL,
+    "recordId" INTEGER NOT NULL,
     "storageKey" TEXT NOT NULL,
     "fileName" TEXT NOT NULL,
     "mimeType" TEXT NOT NULL,
@@ -112,9 +144,10 @@ CREATE TABLE "RecordAttachment" (
 
 -- CreateTable
 CREATE TABLE "Event" (
-    "id" TEXT NOT NULL,
-    "petId" TEXT NOT NULL,
-    "sourceRecordId" TEXT,
+    "id" INTEGER NOT NULL DEFAULT nextval('"Event_id_seq"'),
+    "token" TEXT NOT NULL,
+    "petId" INTEGER NOT NULL,
+    "sourceRecordId" INTEGER,
     "type" "EventType" NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL DEFAULT '',
@@ -123,7 +156,7 @@ CREATE TABLE "Event" (
     "status" "EventStatus" NOT NULL DEFAULT 'PENDIENTE',
     "location" TEXT,
     "metadata" JSONB,
-    "createdByUserId" TEXT NOT NULL,
+    "createdByUserId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -132,8 +165,9 @@ CREATE TABLE "Event" (
 
 -- CreateTable
 CREATE TABLE "EventReminder" (
-    "id" TEXT NOT NULL,
-    "eventId" TEXT NOT NULL,
+    "id" INTEGER NOT NULL DEFAULT nextval('"EventReminder_id_seq"'),
+    "token" TEXT NOT NULL,
+    "eventId" INTEGER NOT NULL,
     "channel" "ReminderChannel" NOT NULL,
     "offsetMinutes" INTEGER NOT NULL,
     "scheduledFor" TIMESTAMP(3) NOT NULL,
@@ -146,10 +180,11 @@ CREATE TABLE "EventReminder" (
 
 -- CreateTable
 CREATE TABLE "Notification" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "petId" TEXT,
-    "eventId" TEXT,
+    "id" INTEGER NOT NULL DEFAULT nextval('"Notification_id_seq"'),
+    "token" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "petId" INTEGER,
+    "eventId" INTEGER,
     "type" "NotificationType" NOT NULL,
     "title" TEXT NOT NULL,
     "body" TEXT NOT NULL,
@@ -163,7 +198,13 @@ CREATE TABLE "Notification" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_token_key" ON "User"("token");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_tokenHash_key" ON "Session"("tokenHash");
@@ -172,7 +213,13 @@ CREATE UNIQUE INDEX "Session_tokenHash_key" ON "Session"("tokenHash");
 CREATE INDEX "Session_userId_idx" ON "Session"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Pet_token_key" ON "Pet"("token");
+
+-- CreateIndex
 CREATE INDEX "Pet_userId_idx" ON "Pet"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "MedicalRecord_token_key" ON "MedicalRecord"("token");
 
 -- CreateIndex
 CREATE INDEX "MedicalRecord_petId_recordedAt_idx" ON "MedicalRecord"("petId", "recordedAt" DESC);
@@ -181,7 +228,13 @@ CREATE INDEX "MedicalRecord_petId_recordedAt_idx" ON "MedicalRecord"("petId", "r
 CREATE INDEX "MedicalRecord_createdByUserId_idx" ON "MedicalRecord"("createdByUserId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "RecordAttachment_token_key" ON "RecordAttachment"("token");
+
+-- CreateIndex
 CREATE INDEX "RecordAttachment_recordId_idx" ON "RecordAttachment"("recordId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Event_token_key" ON "Event"("token");
 
 -- CreateIndex
 CREATE INDEX "Event_petId_startAt_idx" ON "Event"("petId", "startAt");
@@ -190,10 +243,16 @@ CREATE INDEX "Event_petId_startAt_idx" ON "Event"("petId", "startAt");
 CREATE INDEX "Event_createdByUserId_idx" ON "Event"("createdByUserId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "EventReminder_token_key" ON "EventReminder"("token");
+
+-- CreateIndex
 CREATE INDEX "EventReminder_eventId_idx" ON "EventReminder"("eventId");
 
 -- CreateIndex
 CREATE INDEX "EventReminder_status_scheduledFor_idx" ON "EventReminder"("status", "scheduledFor");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Notification_token_key" ON "Notification"("token");
 
 -- CreateIndex
 CREATE INDEX "Notification_userId_createdAt_idx" ON "Notification"("userId", "createdAt" DESC);

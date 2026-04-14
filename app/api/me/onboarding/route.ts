@@ -8,7 +8,7 @@ import { jsonResponse, validationErrorResponse } from "@/server/shared/api-respo
 export async function PATCH(request: Request) {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const currentUser = await authService.getUserBySessionToken(sessionToken);
+  const currentUser = await authService.getStoredUserBySessionToken(sessionToken);
 
   if (!currentUser) {
     return jsonResponse(

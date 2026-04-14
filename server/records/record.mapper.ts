@@ -13,10 +13,17 @@ function mapRecordType(type: MedicalRecordType): HealthRecordType {
   return "Peso";
 }
 
-export function mapHealthRecord(record: MedicalRecord): HealthRecord {
+export function mapHealthRecord(
+  record: MedicalRecord & {
+    token: string;
+    pet?: {
+      token: string;
+    };
+  }
+): HealthRecord {
   return {
-    id: record.id,
-    petId: record.petId,
+    id: record.token,
+    petId: record.pet?.token ?? String(record.petId),
     type: mapRecordType(record.type),
     title: record.title,
     description: record.description,

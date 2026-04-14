@@ -5,9 +5,16 @@ const absoluteUrlSchema = z.string().url();
 const avatarSchema = z
   .string()
   .trim()
-  .refine((value) => value === "" || /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(value) || absoluteUrlSchema.safeParse(value).success, {
-    message: "Avatar invalido"
-  });
+  .refine(
+    (value) =>
+      value === "" ||
+      value.startsWith("/") ||
+      /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(value) ||
+      absoluteUrlSchema.safeParse(value).success,
+    {
+      message: "Avatar invalido"
+    }
+  );
 
 export const createPetSchema = z.object({
   name: z.string().trim().min(2, "Ingresa el nombre").max(80, "El nombre es demasiado largo"),

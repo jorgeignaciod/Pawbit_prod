@@ -12,13 +12,14 @@ function mapSex(sex: PrismaPetSex): Pet["sex"] {
 
 export function mapPet(
   pet: PrismaPet & {
+    token: string;
     user: {
       name: string;
     };
   }
 ): Pet {
   return {
-    id: pet.id,
+    id: pet.token,
     name: pet.name,
     species: mapSpecies(pet.species),
     breed: pet.breed,

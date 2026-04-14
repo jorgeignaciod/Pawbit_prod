@@ -2,7 +2,8 @@ import { prisma } from "@/server/db/prisma";
 import { StoredUser } from "@/server/users/user.types";
 
 function mapUser(user: {
-  id: string;
+  id: number;
+  token: string;
   name: string;
   email: string;
   phone: string;
@@ -34,7 +35,7 @@ export const userRepository = {
     return user ? mapUser(user) : null;
   },
 
-  async findById(id: string) {
+  async findById(id: number) {
     const user = await prisma.user.findUnique({
       where: {
         id
@@ -47,7 +48,7 @@ export const userRepository = {
   async create(user: StoredUser) {
     const createdUser = await prisma.user.create({
       data: {
-        id: user.id,
+        token: user.token,
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -66,7 +67,7 @@ export const userRepository = {
     return mapUser(createdUser);
   },
 
-  async update(userId: string, updater: (user: StoredUser) => StoredUser) {
+  async update(userId: number, updater: (user: StoredUser) => StoredUser) {
     const currentUser = await this.findById(userId);
 
     if (!currentUser) {
@@ -80,6 +81,7 @@ export const userRepository = {
       },
       data: {
         name: nextUser.name,
+        token: nextUser.token,
         email: nextUser.email,
         phone: nextUser.phone,
         country: nextUser.country,

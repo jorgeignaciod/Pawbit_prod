@@ -1,6 +1,6 @@
 import { PetSex, PetSpecies } from "@prisma/client";
 
-import { createId } from "@/server/shared/ids";
+import { createToken } from "@/server/shared/ids";
 import { prisma } from "@/server/db/prisma";
 import { mapPet } from "@/server/pets/pet.mapper";
 import { CreatePetInput, UpdatePetInput } from "@/server/pets/pet.schemas";
@@ -19,7 +19,7 @@ function toSex(sex: CreatePetInput["sex"]) {
 }
 
 export const petRepository = {
-  async findByUserId(userId: string) {
+  async findByUserId(userId: number) {
     const pets = await prisma.pet.findMany({
       where: {
         userId
@@ -39,10 +39,10 @@ export const petRepository = {
     return pets.map(mapPet);
   },
 
-  async findByIdForUser(petId: string, userId: string) {
+  async findByIdForUser(petToken: string, userId: number) {
     const pet = await prisma.pet.findFirst({
       where: {
-        id: petId,
+        token: petToken,
         userId
       },
       include: {
@@ -57,10 +57,10 @@ export const petRepository = {
     return pet ? mapPet(pet) : null;
   },
 
-  async createForUser(userId: string, input: CreatePetInput) {
+  async createForUser(userId: number, input: CreatePetInput) {
     const pet = await prisma.pet.create({
       data: {
-        id: createId("pet"),
+        token: createToken("pet"),
         userId,
         name: input.name,
         species: toSpecies(input.species),
@@ -86,10 +86,10 @@ export const petRepository = {
     return mapPet(pet);
   },
 
-  async updateBasicForUser(petId: string, userId: string, input: UpdatePetInput) {
+  async updateBasicForUser(petToken: string, userId: number, input: UpdatePetInput) {
     const pet = await prisma.pet.updateMany({
       where: {
-        id: petId,
+        token: petToken,
         userId
       },
       data: {
@@ -106,6 +106,6 @@ export const petRepository = {
       return null;
     }
 
-    return this.findByIdForUser(petId, userId);
+    return this.findByIdForUser(petToken, userId);
   }
 };

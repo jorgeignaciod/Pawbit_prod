@@ -50,6 +50,7 @@ export default function EditPetPage() {
   const [status, setStatus] = useState<"loading" | "error" | "success">("loading");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [breedOptions, setBreedOptions] = useState<string[]>([]);
   const [breedsLoading, setBreedsLoading] = useState(false);
   const [petId, setPetId] = useState("");
@@ -132,6 +133,7 @@ export default function EditPetPage() {
     if (!petId) return;
 
     setSaving(true);
+    setSaveError(null);
 
     try {
       const updatedPet = await petsService.updatePet(petId, {
@@ -145,8 +147,8 @@ export default function EditPetPage() {
 
       setPet(updatedPet);
       setSaved(true);
-    } catch {
-      setStatus("error");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "No pudimos guardar los cambios.");
     } finally {
       setSaving(false);
     }
@@ -193,6 +195,10 @@ export default function EditPetPage() {
               <h2 className="text-[22px] font-semibold text-pawbit-text">Información básica</h2>
               <p className="text-sm text-pawbit-muted">Actualiza la foto y los datos principales de {pet.name}.</p>
             </div>
+
+            {saveError ? (
+              <div className="rounded-[20px] bg-pawbit-error-bg px-4 py-3 text-sm text-pawbit-text">{saveError}</div>
+            ) : null}
 
             <FormField label="Avatar" helper="Puedes cambiar la foto principal que verás en el perfil.">
               <label className="block cursor-pointer">

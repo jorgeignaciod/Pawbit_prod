@@ -1,4 +1,4 @@
-import { createId } from "@/server/shared/ids";
+import { createToken } from "@/server/shared/ids";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { createSessionToken, hashSessionToken, SESSION_DURATION_MS } from "@/server/auth/session";
 import { sessionRepository } from "@/server/auth/session.repository";
@@ -13,7 +13,8 @@ function buildUser(input: RegisterInput): StoredUser {
   const timestamp = new Date().toISOString();
 
   return {
-    id: createId("user"),
+    id: 0,
+    token: createToken("user"),
     name: input.name,
     email: input.email,
     phone: input.phone ?? "",
@@ -29,13 +30,14 @@ function buildUser(input: RegisterInput): StoredUser {
   };
 }
 
-async function createSession(userId: string) {
+async function createSession(userId: number) {
   const token = createSessionToken();
   const timestamp = new Date();
   const expiresAt = new Date(timestamp.getTime() + SESSION_DURATION_MS).toISOString();
 
   await sessionRepository.create({
-    id: createId("session"),
+    id: 0,
+    token: createToken("session"),
     userId,
     tokenHash: hashSessionToken(token),
     expiresAt,
@@ -89,7 +91,7 @@ export const authService = {
     };
   },
 
-  async getUserBySessionToken(sessionToken?: string | null): Promise<PublicUser | null> {
+  async getStoredUserBySessionToken(sessionToken?: string | null): Promise<StoredUser | null> {
     if (!sessionToken) {
       return null;
     }
@@ -102,6 +104,12 @@ export const authService = {
 
     const user = await userRepository.findById(session.userId);
 
+    return user;
+  },
+
+  async getUserBySessionToken(sessionToken?: string | null): Promise<PublicUser | null> {
+    const user = await this.getStoredUserBySessionToken(sessionToken);
+
     return user ? toPublicUser(user) : null;
   },
 
@@ -113,7 +121,7 @@ export const authService = {
     await sessionRepository.deleteByTokenHash(hashSessionToken(sessionToken));
   },
 
-  async completeOnboarding(userId: string, input: OnboardingInput) {
+  async completeOnboarding(userId: number, input: OnboardingInput) {
     const updatedUser = await userRepository.update(userId, (user) => ({
       ...user,
       country: input.country,

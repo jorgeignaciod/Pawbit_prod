@@ -10,6 +10,7 @@ async function main() {
       email: "jorge@pawbit.app"
     },
     update: {
+      token: "user_seed_jorge",
       name: "Jorge Cifuentes",
       phone: "+56 9 8765 4321",
       country: "Chile",
@@ -20,7 +21,7 @@ async function main() {
       onboardingCompleted: true
     },
     create: {
-      id: "user_seed_jorge",
+      token: "user_seed_jorge",
       name: "Jorge Cifuentes",
       email: "jorge@pawbit.app",
       phone: "+56 9 8765 4321",
@@ -35,8 +36,9 @@ async function main() {
   });
 
   await prisma.pet.upsert({
-    where: { id: "pet_seed_mora" },
+    where: { token: "pet_seed_mora" },
     update: {
+      token: "pet_seed_mora",
       userId: user.id,
       name: "Mora",
       species: PetSpecies.PERRO,
@@ -51,7 +53,7 @@ async function main() {
       notes: "Le cuesta tolerar viajes largos y necesita premio después del control."
     },
     create: {
-      id: "pet_seed_mora",
+      token: "pet_seed_mora",
       userId: user.id,
       name: "Mora",
       species: PetSpecies.PERRO,
@@ -68,8 +70,9 @@ async function main() {
   });
 
   await prisma.pet.upsert({
-    where: { id: "pet_seed_simba" },
+    where: { token: "pet_seed_simba" },
     update: {
+      token: "pet_seed_simba",
       userId: user.id,
       name: "Simba",
       species: PetSpecies.GATO,
@@ -84,7 +87,7 @@ async function main() {
       notes: "Alergia estacional leve. Prefiere visitas por la mañana."
     },
     create: {
-      id: "pet_seed_simba",
+      token: "pet_seed_simba",
       userId: user.id,
       name: "Simba",
       species: PetSpecies.GATO,

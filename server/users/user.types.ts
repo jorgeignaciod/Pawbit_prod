@@ -1,7 +1,8 @@
 export type DocumentType = "RUT" | "DNI";
 
 export interface StoredUser {
-  id: string;
+  id: number;
+  token: string;
   name: string;
   email: string;
   phone: string;
@@ -18,6 +19,7 @@ export interface StoredUser {
 
 export interface PublicUser {
   id: string;
+  token: string;
   name: string;
   email: string;
   phone: string;
@@ -32,7 +34,11 @@ export interface PublicUser {
 }
 
 export function toPublicUser(user: StoredUser): PublicUser {
-  const { passwordHash: _passwordHash, ...publicUser } = user;
+  const { passwordHash: _passwordHash, id: _internalId, token, ...rest } = user;
 
-  return publicUser;
+  return {
+    id: token,
+    token,
+    ...rest
+  };
 }

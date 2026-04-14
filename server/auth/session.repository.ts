@@ -1,16 +1,18 @@
 import { prisma } from "@/server/db/prisma";
 
 export interface StoredSession {
-  id: string;
-  userId: string;
+  id: number;
+  token: string;
+  userId: number;
   tokenHash: string;
   expiresAt: string;
   createdAt: string;
 }
 
 function mapSession(session: {
-  id: string;
-  userId: string;
+  id: number;
+  token: string;
+  userId: number;
   tokenHash: string;
   expiresAt: Date;
   createdAt: Date;
@@ -26,7 +28,7 @@ export const sessionRepository = {
   async create(session: StoredSession) {
     const createdSession = await prisma.session.create({
       data: {
-        id: session.id,
+        token: session.token,
         userId: session.userId,
         tokenHash: session.tokenHash,
         expiresAt: new Date(session.expiresAt),
