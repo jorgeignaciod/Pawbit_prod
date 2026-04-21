@@ -12,6 +12,8 @@ jobs:
   verify:
     name: Test And Build
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://pawbit:pawbit@127.0.0.1:5432/pawbit_test?schema=public
 
     steps:
       - name: Checkout
