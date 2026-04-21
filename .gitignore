@@ -14,6 +14,7 @@ coverage
 dist
 out
 .vercel
+backups
 ios/App/Pods
 ios/App/App/public
 ios/App/App.xcworkspace/xcuserdata
