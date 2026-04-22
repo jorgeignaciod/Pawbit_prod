@@ -35,3 +35,7 @@ Notas:
 ## Demo states
 
 Algunas vistas aceptan `?state=loading`, `?state=empty`, `?state=error` o `?state=success` para validar sus estados principales.
+
+## Quality Gate
+
+El repositorio ejecuta un workflow de GitHub Actions llamado `Quality Gate` en cada push a `main` y en cada pull request hacia `main`.
